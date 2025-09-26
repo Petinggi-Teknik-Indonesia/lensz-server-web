@@ -2,8 +2,8 @@ package handler
 
 import (
 	"net/http"
-	"myapp/internal/domain"
-	"myapp/internal/service"
+	"lensz-server-web/internal/domain/models"
+	"lensz-server-web/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +16,7 @@ func NewUserHandler(s service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
-	var req domain.User
+	var req models.User
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

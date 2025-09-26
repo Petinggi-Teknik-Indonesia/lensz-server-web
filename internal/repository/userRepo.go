@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"myapp/internal/domain"
+	"lensz-server-web/internal/domain/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	FindByEmail(email string) (*domain.User, error)
-	Create(user *domain.User) error
+	FindByEmail(email string) (*models.User, error)
+	Create(user *models.User) error
 }
 
 type userRepo struct {
@@ -18,12 +18,12 @@ func NewUserRepo(db *gorm.DB) UserRepository {
 	return &userRepo{db}
 }
 
-func (r *userRepo) FindByEmail(email string) (*domain.User, error) {
-	var user domain.User
+func (r *userRepo) FindByEmail(email string) (*models.User, error) {
+	var user models.User
 	err := r.db.Where("email = ?", email).First(&user).Error
 	return &user, err
 }
 
-func (r *userRepo) Create(user *domain.User) error {
+func (r *userRepo) Create(user *models.User) error {
 	return r.db.Create(user).Error
 }
