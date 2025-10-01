@@ -1,16 +1,27 @@
 package main
 
 import (
-  "github.com/gin-gonic/gin"
-  "net/http"
+	"log"
+
+	"github.com/gin-gonic/gin"
+	"lensz-server-web/config"
+	"lensz-server-web/internal/router"
 )
 
 func main() {
-  router := gin.Default()
-  router.GET("/ping", func(c *gin.Context) {
-    c.JSON(http.StatusOK, gin.H{
-      "message": "pong",
-    })
-  })
-  router.Run()
+	// load config
+	cfg := config.Load()
+
+	// init DB
+	db, err := config.InitDB(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// setup router
+	r := gin.Default()
+	router.SetupRoutes(r, db)
+
+	// run server
+	r.Run(":" + cfg.ServerPort)
 }
