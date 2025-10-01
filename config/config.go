@@ -1,8 +1,10 @@
 package config
 
 import (
+	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -10,24 +12,46 @@ import (
 )
 
 type Config struct {
-	DBUrl      string
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
 	ServerPort string
 }
 
 func Load() Config {
+	// Try to load .env if available
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️ No .env file found, relying on system environment variables")
+	}
+
 	return Config{
-		DBUrl:      os.Getenv("DATABASE_URL"),
-		ServerPort: os.Getenv("PORT"), // defaults to :8080 in some environments, you can fallback if needed
+		DBHost:     os.Getenv("DB_HOST"),
+		DBPort:     os.Getenv("DB_PORT"),
+		DBUser:     os.Getenv("DB_USER"),
+		DBPassword: os.Getenv("DB_PASSWORD"),
+		DBName:     os.Getenv("DB_NAME"),
+		ServerPort: os.Getenv("SERVER_PORT"),
 	}
 }
 
 func InitDB(cfg Config) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(cfg.DBUrl), &gorm.Config{})
+	// DSN for PostgreSQL
+	dsn := "host=" + cfg.DBHost +
+		" user=" + cfg.DBUser +
+		" password=" + cfg.DBPassword +
+		" dbname=" + cfg.DBName +
+		" port=" + cfg.DBPort +
+		" sslmode=disable"
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	// Auto-migrate all models
+	// Auto-migrate ALL models
 	err = db.AutoMigrate(
 		&model.User{},
 		&model.Drawer{},
@@ -39,5 +63,6 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	log.Println("✅ Database migration complete")
 	return db, nil
 }
