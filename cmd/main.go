@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"lensz-server-web/config"
+	"lensz-server-web/internal/config"
 	"lensz-server-web/internal/router"
 )
 

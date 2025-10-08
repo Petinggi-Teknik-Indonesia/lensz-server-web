@@ -6,41 +6,40 @@ import (
 
 type Drawer struct {
 	gorm.Model
-	Name    string
-	Glasses []Glasses `gorm:"foreignKey:DrawerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name    string     `json:"name"`
+	Glasses []Glasses  `json:"glasses" gorm:"foreignKey:DrawerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type Brand struct {
 	gorm.Model
-	Name    string
-	Glasses []Glasses `gorm:"foreignKey:BrandID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name    string     `json:"name"`
+	Glasses []Glasses  `json:"glasses" gorm:"foreignKey:BrandID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type Company struct {
 	gorm.Model
-	Name    string
-	Glasses []Glasses `gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name    string     `json:"name"`
+	Glasses []Glasses  `json:"glasses" gorm:"foreignKey:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type Glasses struct {
 	gorm.Model
-	Name        string
-	Type        string
-	Color       string
-	Description *string
-	RFID *string
-	Status      GlassesStatus `gorm:"not null"`
+	Name        string         `json:"name"`
+	Type        string         `json:"type"`
+	Color       string         `json:"color"`
+	Description *string        `json:"description,omitempty"`
+	RFID        *string        `json:"rfid,omitempty"`
+	Status      GlassesStatus  `json:"status" gorm:"not null;default:0"`
 
-	// Foreign Keys (nullable because of SET NULL)
-	DrawerID  *uint
-	BrandID   *uint
-	CompanyID *uint
+	DrawerID  uint    `json:"drawerId"`
+	BrandID   uint    `json:"brandId"`
+	CompanyID uint    `json:"companyId"`
 
-	// Relations
-	Drawer  Drawer
-	Brand   Brand
-	Company Company
+	Drawer  Drawer  `json:"drawer,omitempty"`
+	Brand   Brand   `json:"brand,omitempty"`
+	Company Company `json:"company,omitempty"`
 }
+
 
 // Enum
 type GlassesStatus int

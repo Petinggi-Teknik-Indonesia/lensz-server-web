@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/repository"
 )
@@ -15,29 +16,80 @@ func NewGlassesService(repo *repository.GlassesRepository) *GlassesService {
 }
 
 func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) error {
-	return s.repo.Create(ctx, g)
+	// ---- HANDLE BRAND ----
+	if g.BrandID != 0 {
+		// check existing brand
+		brand, err := s.repo.FindBrandByID(ctx, g.BrandID)
+		if err != nil {
+			return errors.New("brand not found")
+		}
+		g.BrandID = brand.ID
+	} else if g.Brand.Name != "" {
+		// create new brand
+		if err := s.repo.CreateBrand(ctx, &g.Brand); err != nil {
+			return err
+		}
+		g.BrandID = g.Brand.ID
+	} else {
+		return errors.New("brand is required (id or name)")
+	}
+
+	// ---- HANDLE COMPANY ----
+	if g.CompanyID != 0 {
+		company, err := s.repo.FindCompanyByID(ctx, g.CompanyID)
+		if err != nil {
+			return errors.New("company not found")
+		}
+		g.CompanyID = company.ID
+	} else if g.Company.Name != "" {
+		if err := s.repo.CreateCompany(ctx, &g.Company); err != nil {
+			return err
+		}
+		g.CompanyID = g.Company.ID
+	} else {
+		return errors.New("company is required (id or name)")
+	}
+
+	// ---- HANDLE DRAWER ----
+	if g.DrawerID != 0 {
+		drawer, err := s.repo.FindDrawerByID(ctx, g.DrawerID)
+		if err != nil {
+			return errors.New("drawer not found")
+		}
+		g.DrawerID = drawer.ID
+	} else if g.Drawer.Name != "" {
+		if err := s.repo.CreateDrawer(ctx, &g.Drawer); err != nil {
+			return err
+		}
+		g.DrawerID = g.Drawer.ID
+	} else {
+		return errors.New("drawer is required (id or name)")
+	}
+
+	// ---- Finally create the glasses ----
+	return s.repo.CreateGlasses(ctx, g)
 }
 
 func (s *GlassesService) GetGlassesByID(ctx context.Context, id uint) (*model.Glasses, error) {
-	return s.repo.FindByID(ctx, id)
+	return s.repo.FindGlassesByID(ctx, id)
 }
 
 func (s *GlassesService) GetAllGlasses(ctx context.Context) ([]model.Glasses, error) {
-	return s.repo.FindAll(ctx)
+	return s.repo.FindAllGlasses(ctx)
 }
 
 func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) error {
-	return s.repo.Update(ctx, g)
+	return s.repo.UpdateGlasses(ctx, g)
 }
 
 func (s *GlassesService) DeleteGlasses(ctx context.Context, id uint) error {
-	return s.repo.Delete(ctx, id)
+	return s.repo.DeleteGlasses(ctx, id)
 }
 
 func (s *GlassesService) GetGlassesByStatus(ctx context.Context, status model.GlassesStatus) ([]model.Glasses, error) {
-	return s.repo.FindByStatus(ctx, status)
+	return s.repo.FindGlassesByStatus(ctx, status)
 }
 
 func (s *GlassesService) GetGlassesByBrand(ctx context.Context, brandID uint) ([]model.Glasses, error) {
-	return s.repo.FindByBrand(ctx, brandID)
+	return s.repo.FindGlassesByBrand(ctx, brandID)
 }
