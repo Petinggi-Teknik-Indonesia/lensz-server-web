@@ -38,6 +38,8 @@ type Glasses struct {
 	Drawer  Drawer  `json:"drawer,omitempty"`
 	Brand   Brand   `json:"brand,omitempty"`
 	Company Company `json:"company,omitempty"`
+
+	StatusHistory []StatusHistory `json:"statusHistory"`
 }
 
 
@@ -54,4 +56,14 @@ const (
 
 func (s GlassesStatus) String() string {
 	return [...]string{"Tersedia", "Terjual", "Rusak", "Terpinjam", "Lainnya"}[s]
+}
+
+type StatusHistory struct{
+	gorm.Model
+	StatusChange GlassesStatus
+	GlassesID uint
+	UserID uint
+
+	Glasses Glasses
+	User User
 }

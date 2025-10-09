@@ -21,6 +21,21 @@ type User struct {
 	Role     Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
+type Organization struct {
+	gorm.Model
+	Name string
+}
+
+type OrganizationMembers struct {
+	gorm.Model
+	OrganizationID uint
+	UserID uint
+
+	User []User
+	Organization []Organization
+}
+
+
 // HashPassword generates a bcrypt hash
 func (u *User) HashPassword(password string) error {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
