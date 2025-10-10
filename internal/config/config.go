@@ -53,7 +53,6 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 
 	// Auto-migrate ALL models
 	err = db.AutoMigrate(
-		&model.User{},
 		&model.Drawer{},
 		&model.Brand{},
 		&model.Company{},
@@ -61,9 +60,8 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 		&model.StatusHistory{},
 		&model.Role{},
 		&model.Organization{},
-		&model.OrganizationMembers{},
+		&model.User{},
 		&model.Scanner{},
-		&model.Ownership{},
 	)
 	if err != nil {
 		return nil, err

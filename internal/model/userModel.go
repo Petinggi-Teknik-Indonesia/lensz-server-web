@@ -19,20 +19,14 @@ type User struct {
 	Password string `json:"-" gorm:"not null"`
 	RoleID   uint
 	Role     Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	OrganizationID uint
 }
 
 type Organization struct {
 	gorm.Model
-	Name string 
-}
-
-type OrganizationMembers struct {
-	gorm.Model
-	OrganizationID uint 
-	UserID uint 
-
+	Name     string
+	Scanners []Scanner `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	User []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Organization []Organization `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 

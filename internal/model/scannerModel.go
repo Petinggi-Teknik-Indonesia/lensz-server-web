@@ -4,17 +4,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Each scanner belongs to one organization
 type Scanner struct {
 	gorm.Model
-	Name string
+	Name           string
+	OrganizationID uint          // foreign key
+	Organization   Organization  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
-//  {"Name":"value"} 
-//  {"name":"value"} `json:"name"`
 
-type Ownership struct{
-	gorm.Model
-	OrganizationID uint 
-	Organization Organization
-	Scanner []Scanner `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-}
