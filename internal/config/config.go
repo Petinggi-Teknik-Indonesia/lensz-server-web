@@ -58,6 +58,12 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 		&model.Brand{},
 		&model.Company{},
 		&model.Glasses{},
+		&model.StatusHistory{},
+		&model.Role{},
+		&model.Organization{},
+		&model.OrganizationMembers{},
+		&model.Scanner{},
+		&model.Ownership{},
 	)
 	if err != nil {
 		return nil, err

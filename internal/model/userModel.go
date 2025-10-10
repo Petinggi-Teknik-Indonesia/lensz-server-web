@@ -6,9 +6,9 @@ import (
 )
 
 type Role struct {
-	ID   uint   `gorm:"primaryKey"`
+	gorm.Model
 	Name string `gorm:"unique;not null"`
-	Users []User
+	Users []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type User struct {
@@ -17,22 +17,22 @@ type User struct {
 	Email    string `gorm:"uniqueIndex;not null"`
 	Phone    string 
 	Password string `json:"-" gorm:"not null"`
-	RoleID   *uint
+	RoleID   uint
 	Role     Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type Organization struct {
 	gorm.Model
-	Name string
+	Name string 
 }
 
 type OrganizationMembers struct {
 	gorm.Model
-	OrganizationID uint
-	UserID uint
+	OrganizationID uint 
+	UserID uint 
 
-	User []User
-	Organization []Organization
+	User []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Organization []Organization `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 
