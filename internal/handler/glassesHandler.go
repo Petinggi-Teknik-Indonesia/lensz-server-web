@@ -36,7 +36,7 @@ func (h *GlassesHandler) Create(c *gin.Context) {
 // GET /glasses/:id
 func (h *GlassesHandler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	glasses, err := h.service.GetGlassesByID(c, uint(id))
+	glasses, err := h.service.GetGlassesSimplifiedByID(c, uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -46,7 +46,7 @@ func (h *GlassesHandler) GetByID(c *gin.Context) {
 
 // GET /glasses
 func (h *GlassesHandler) GetAll(c *gin.Context) {
-	glasses, err := h.service.GetAllGlasses(c)
+	glasses, err := h.service.GetAllGlassesPartial(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

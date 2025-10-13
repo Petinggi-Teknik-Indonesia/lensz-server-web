@@ -1,3 +1,4 @@
+//often called usecase
 package service
 
 import (
@@ -13,6 +14,10 @@ type GlassesService struct {
 
 func NewGlassesService(repo *repository.GlassesRepository) *GlassesService {
 	return &GlassesService{repo: repo}
+}
+
+func (s *GlassesService) CreateBrand(ctx context.Context, g *model.Brand) error{
+	return s.repo.CreateBrand(ctx,g)
 }
 
 func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) error {
@@ -77,6 +82,17 @@ func (s *GlassesService) GetGlassesByID(ctx context.Context, id uint) (*model.Gl
 func (s *GlassesService) GetAllGlasses(ctx context.Context) ([]model.Glasses, error) {
 	return s.repo.FindAllGlasses(ctx)
 }
+
+func (s *GlassesService) GetAllGlassesPartial(ctx context.Context) ([]model.GlassesPartialResponse, error) {
+	return s.repo.FindAllGlassesPartial(ctx)
+}
+
+func (s *GlassesService) GetGlassesSimplifiedByID(ctx context.Context, id uint) (*model.GlassesSingleResponse, error) {
+	return s.repo.FindGlassesSimplifiedByID(ctx, id)
+}
+
+
+
 
 func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) error {
 	return s.repo.UpdateGlasses(ctx, g)

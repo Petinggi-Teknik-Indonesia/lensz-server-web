@@ -47,6 +47,51 @@ func (r *GlassesRepository) FindAllGlasses(ctx context.Context) ([]model.Glasses
 	return glasses, err
 }
 
+func (r *GlassesRepository) FindAllGlassesPartial(ctx context.Context) ([]model.GlassesPartialResponse, error) {
+	var result []model.GlassesPartialResponse
+
+	err := r.db.WithContext(ctx).
+		Table("glasses").
+		Select("glasses.id, glasses.name, glasses.color, glasses.status, brands.name as brand, drawers.name as drawer").
+		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
+		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
+		Scan(&result).Error
+
+	return result, err
+}
+
+func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id uint) (*model.GlassesSingleResponse, error) {
+	var result model.GlassesSingleResponse
+
+	err := r.db.WithContext(ctx).
+		Table("glasses").
+		Select(`
+			glasses.id,
+			glasses.name,
+			glasses.type,
+			glasses.color,
+			glasses.description,
+			glasses.rf_id,
+			glasses.status,
+			drawers.name as drawer,
+			brands.name as brand,
+			companies.name as company
+		`).
+		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
+		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
+		Joins("LEFT JOIN companies ON companies.id = glasses.company_id").
+		Where("glasses.id = ?", id).
+		Scan(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+
+
+
 // Update Glasses
 func (r *GlassesRepository) UpdateGlasses(ctx context.Context, glasses *model.Glasses) error {
 	return r.db.WithContext(ctx).Save(glasses).Error
