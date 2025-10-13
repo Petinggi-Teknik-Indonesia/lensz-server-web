@@ -75,7 +75,9 @@ func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id ui
 			glasses.status,
 			drawers.name as drawer,
 			brands.name as brand,
-			companies.name as company
+			companies.name as company,
+			glasses.created_at,
+			glasses.updated_at
 		`).
 		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
 		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
