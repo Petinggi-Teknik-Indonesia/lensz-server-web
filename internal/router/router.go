@@ -4,17 +4,24 @@ import (
 	"lensz-server-web/internal/handler"
 	"lensz-server-web/internal/repository"
 	"lensz-server-web/internal/service"
+	"lensz-server-web/internal/ws"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(r *gin.Engine, db *gorm.DB) {
+func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
+	
 	// Glasses setup
 	glassesRepo := repository.NewGlassesRepository(db)
 	glassesService := service.NewGlassesService(glassesRepo)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
+	scannerHandler := handler.NewScannerHandler(hub)
+
+	r.POST("/scanner/scan", scannerHandler.Scan)
+	r.POST("/scanner/complete", scannerHandler.CompleteRegistration)
+	r.GET("/ws", ws.ServeWs(hub))
 
 	api := r.Group("/api")
 	{

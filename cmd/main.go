@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"lensz-server-web/internal/config"
 	"lensz-server-web/internal/router"
+	"lensz-server-web/internal/ws"
 )
 
 func main() {
@@ -18,9 +19,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	
+
 	// setup router
 	r := gin.Default()
-	router.SetupRoutes(r, db)
+	hub := ws.NewHub()
+	go hub.Run()
+	router.SetupRoutes(r, db, hub)
 
 	// run server
 	r.Run(":" + cfg.ServerPort)
