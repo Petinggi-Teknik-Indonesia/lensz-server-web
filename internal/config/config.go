@@ -62,6 +62,7 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 		&model.Organization{},
 		&model.User{},
 		&model.Scanner{},
+		&model.PendingRFID{},
 	)
 	if err != nil {
 		return nil, err
