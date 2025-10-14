@@ -7,28 +7,27 @@ import (
 
 type Role struct {
 	gorm.Model
-	Name string `gorm:"unique;not null"`
-	Users []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name  string `json:"name" gorm:"unique;not null"`
+	Users []User `json:"users" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type User struct {
 	gorm.Model
-	Name     string
-	Email    string `gorm:"uniqueIndex;not null"`
-	Phone    string 
-	Password string `json:"-" gorm:"not null"`
-	RoleID   uint
-	Role     Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	OrganizationID uint
+	Name           string `json:"name"`
+	Email          string `json:"email" gorm:"uniqueIndex;not null"`
+	Phone          string `json:"phone"`
+	Password       string `json:"-" gorm:"not null"`
+	RoleID         uint   `json:"roleId"`
+	Role           Role   `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	OrganizationID uint   `json:"organizationId"`
 }
 
 type Organization struct {
 	gorm.Model
-	Name     string
-	Scanners []Scanner `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	User []User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name     string     `json:"name"`
+	Scanners []Scanner  `json:"scanners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	User     []User     `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
-
 
 // HashPassword generates a bcrypt hash
 func (u *User) HashPassword(password string) error {
