@@ -7,6 +7,9 @@ import (
 	"lensz-server-web/internal/ws"
 	"net/http"
 
+
+	"github.com/gin-contrib/cors"
+	"time"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -20,6 +23,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	scannerHandler := handler.NewScannerHandler(hub)
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	websocket := r.Group("/scanner")
 	{
