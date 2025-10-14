@@ -52,6 +52,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		drawers.POST("/", dependencyHandler.CreateDrawer)
 		drawers.GET("/", dependencyHandler.GetAllDrawers)
 		drawers.GET("/:id", dependencyHandler.GetDrawerByID)
+		drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
+		drawers.DELETE("/:id", dependencyHandler.DeleteDrawer)
 	}
 
 	brands := api.Group("/brands")
@@ -59,6 +61,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		brands.POST("/", dependencyHandler.CreateBrand)
 		brands.GET("/", dependencyHandler.GetAllBrands)
 		brands.GET("/:id", dependencyHandler.GetBrandByID)
+		brands.PUT("/:id", dependencyHandler.UpdateBrand)
+		brands.DELETE("/:id", dependencyHandler.DeleteBrand)
 	}
 
 	companies := api.Group("/companies")
@@ -66,5 +70,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		companies.POST("/", dependencyHandler.CreateCompany)
 		companies.GET("/", dependencyHandler.GetAllCompanies)
 		companies.GET("/:id", dependencyHandler.GetCompanyByID)
+		companies.PUT("/:id", dependencyHandler.UpdateCompany)
+		companies.DELETE("/:id", dependencyHandler.DeleteCompany)
 	}
+
 }

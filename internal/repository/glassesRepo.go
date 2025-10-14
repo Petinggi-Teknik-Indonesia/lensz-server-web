@@ -91,9 +91,6 @@ func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id ui
 	return &result, nil
 }
 
-
-
-
 // Update Glasses
 func (r *GlassesRepository) UpdateGlasses(ctx context.Context, glasses *model.Glasses) error {
 	return r.db.WithContext(ctx).Save(glasses).Error
@@ -149,6 +146,16 @@ func (r *GlassesRepository) FindAllDrawers(ctx context.Context) ([]model.Drawer,
 	return drawers, err
 }
 
+
+func (r *GlassesRepository) UpdateDrawer(ctx context.Context, drawer *model.Drawer) error {
+	return r.db.WithContext(ctx).Save(drawer).Error
+}
+
+func (r *GlassesRepository) DeleteDrawer(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&model.Drawer{}, id).Error
+}
+
+
 // ------------------- BRAND -------------------
 
 func (r *GlassesRepository) CreateBrand(ctx context.Context, brand *model.Brand) error {
@@ -170,6 +177,14 @@ func (r *GlassesRepository) FindAllBrands(ctx context.Context) ([]model.Brand, e
 	return brands, err
 }
 
+func (r *GlassesRepository) UpdateBrand(ctx context.Context, brand *model.Brand) error {
+	return r.db.WithContext(ctx).Save(brand).Error
+}
+
+func (r *GlassesRepository) DeleteBrand(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&model.Brand{}, id).Error
+}
+
 // ------------------- COMPANY -------------------
 
 func (r *GlassesRepository) CreateCompany(ctx context.Context, company *model.Company) error {
@@ -189,4 +204,12 @@ func (r *GlassesRepository) FindAllCompanies(ctx context.Context) ([]model.Compa
 	var companies []model.Company
 	err := r.db.WithContext(ctx).Find(&companies).Error
 	return companies, err
+}
+
+func (r *GlassesRepository) UpdateCompany(ctx context.Context, company *model.Company) error {
+	return r.db.WithContext(ctx).Save(company).Error
+}
+
+func (r *GlassesRepository) DeleteCompany(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&model.Company{}, id).Error
 }

@@ -9,7 +9,6 @@ import (
 	"lensz-server-web/internal/service"
 )
 
-// GlassesDependencyHandler groups all Drawer, Brand, and Company handlers
 type GlassesDependencyHandler struct {
 	service *service.GlassesDependencyService
 }
@@ -25,7 +24,6 @@ func (h *GlassesDependencyHandler) CreateDrawer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	if err := h.service.CreateDrawer(c, &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -52,6 +50,31 @@ func (h *GlassesDependencyHandler) GetAllDrawers(c *gin.Context) {
 	c.JSON(http.StatusOK, drawers)
 }
 
+func (h *GlassesDependencyHandler) UpdateDrawer(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req model.Drawer
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	req.ID = uint(id)
+
+	if err := h.service.UpdateDrawer(c, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
+}
+
+func (h *GlassesDependencyHandler) DeleteDrawer(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.service.DeleteDrawer(c, uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 // -------------------- BRAND --------------------
 func (h *GlassesDependencyHandler) CreateBrand(c *gin.Context) {
 	var req model.Brand
@@ -59,7 +82,6 @@ func (h *GlassesDependencyHandler) CreateBrand(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	if err := h.service.CreateBrand(c, &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -86,6 +108,31 @@ func (h *GlassesDependencyHandler) GetAllBrands(c *gin.Context) {
 	c.JSON(http.StatusOK, brands)
 }
 
+func (h *GlassesDependencyHandler) UpdateBrand(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req model.Brand
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	req.ID = uint(id)
+
+	if err := h.service.UpdateBrand(c, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
+}
+
+func (h *GlassesDependencyHandler) DeleteBrand(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.service.DeleteBrand(c, uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 // -------------------- COMPANY --------------------
 func (h *GlassesDependencyHandler) CreateCompany(c *gin.Context) {
 	var req model.Company
@@ -93,7 +140,6 @@ func (h *GlassesDependencyHandler) CreateCompany(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	if err := h.service.CreateCompany(c, &req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -118,4 +164,29 @@ func (h *GlassesDependencyHandler) GetAllCompanies(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, companies)
+}
+
+func (h *GlassesDependencyHandler) UpdateCompany(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	var req model.Company
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	req.ID = uint(id)
+
+	if err := h.service.UpdateCompany(c, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
+}
+
+func (h *GlassesDependencyHandler) DeleteCompany(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.service.DeleteCompany(c, uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
