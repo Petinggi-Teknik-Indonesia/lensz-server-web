@@ -1,32 +1,51 @@
 package main
 
 import (
-	"log"
+    "log"
 
-	"github.com/gin-gonic/gin"
-	"lensz-server-web/internal/config"
-	"lensz-server-web/internal/router"
-	"lensz-server-web/internal/ws"
+    "lensz-server-web/internal/config"
+    "lensz-server-web/internal/router"
+    "lensz-server-web/internal/ws"
+
+    "github.com/gin-contrib/cors"
+    "github.com/gin-gonic/gin"
 )
 
 func main() {
-	// load config
-	cfg := config.Load()
+    cfg := config.Load()
 
-	// init DB
-	db, err := config.InitDB(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
+    db, err := config.InitDB(cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-	
+    // 🔧 Disable automatic redirect for trailing slash
+    r := gin.New()
+    r.RedirectTrailingSlash = false
+    r.Use(gin.Logger(), gin.Recovery())
 
-	// setup router
-	r := gin.Default()
-	hub := ws.NewHub()
-	go hub.Run()
-	router.SetupRoutes(r, db, hub)
+    // ✅ Global CORS (applies to everything)
+    r.Use(cors.New(cors.Config{
+        AllowOrigins: []string{
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        },
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: true,
+    }))
 
-	// run server
-	r.Run(":" + cfg.ServerPort)
+    hub := ws.NewHub()
+    go hub.Run()
+
+    router.SetupRoutes(r, db, hub)
+
+    // Fallback for OPTIONS (preflight)
+    r.OPTIONS("/*path", func(c *gin.Context) {
+        c.Status(204)
+    })
+
+    log.Println("🚀 Server running on :" + cfg.ServerPort)
+    r.Run(":" + cfg.ServerPort)
 }
