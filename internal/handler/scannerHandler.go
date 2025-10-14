@@ -53,3 +53,7 @@ func (h *ScannerHandler) CompleteRegistration(c *gin.Context) {
 	h.isRegistering = false
 	c.JSON(http.StatusOK, gin.H{"message": "Registration completed"})
 }
+func (h *ScannerHandler) CancelRegistration(c *gin.Context) {
+	h.isRegistering = false
+	c.JSON(http.StatusAccepted, gin.H{"message": "Registration completed"})
+}

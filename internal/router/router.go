@@ -19,8 +19,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 	scannerHandler := handler.NewScannerHandler(hub)
 
-	r.POST("/scanner/scan", scannerHandler.Scan)
-	r.POST("/scanner/complete", scannerHandler.CompleteRegistration)
+	websocket := r.Group("/scanner")
+	{
+		websocket.POST("/scan", scannerHandler.Scan)
+		websocket.POST("/complete", scannerHandler.CompleteRegistration)
+		websocket.POST("/cancel", scannerHandler.CancelRegistration)
+	}
 	r.GET("/ws", ws.ServeWs(hub))
 
 	api := r.Group("/api")
