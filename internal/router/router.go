@@ -12,12 +12,14 @@ import (
 )
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
-	
+
 	// Glasses setup
 	glassesRepo := repository.NewGlassesRepository(db)
 	glassesService := service.NewGlassesService(glassesRepo)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 	scannerHandler := handler.NewScannerHandler(hub)
+	dependencyService := service.NewGlassesDependencyService(glassesRepo)
+	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
 
 	websocket := r.Group("/scanner")
 	{
@@ -43,5 +45,26 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		glasses.GET("/:id", glassesHandler.GetByID)
 		glasses.PUT("/:id", glassesHandler.Update)
 		glasses.DELETE("/:id", glassesHandler.Delete)
+	}
+
+	drawers := api.Group("/drawers")
+	{
+		drawers.POST("/", dependencyHandler.CreateDrawer)
+		drawers.GET("/", dependencyHandler.GetAllDrawers)
+		drawers.GET("/:id", dependencyHandler.GetDrawerByID)
+	}
+
+	brands := api.Group("/brands")
+	{
+		brands.POST("/", dependencyHandler.CreateBrand)
+		brands.GET("/", dependencyHandler.GetAllBrands)
+		brands.GET("/:id", dependencyHandler.GetBrandByID)
+	}
+
+	companies := api.Group("/companies")
+	{
+		companies.POST("/", dependencyHandler.CreateCompany)
+		companies.GET("/", dependencyHandler.GetAllCompanies)
+		companies.GET("/:id", dependencyHandler.GetCompanyByID)
 	}
 }
