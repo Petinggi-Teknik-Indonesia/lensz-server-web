@@ -29,7 +29,7 @@ type Glasses struct {
 	Color       string        `json:"color"`
 	Description *string       `json:"description"`
 	RFID        *string       `json:"rfid"`
-	Status      GlassesStatus `json:"status" gorm:"not null;default:0"`
+	Status      GlassesStatus `json:"status" gorm:"type:varchar(20);not null;default:'Tersedia'"`
 
 	DrawerID  uint `json:"-"`
 	BrandID   uint `json:"-"`
@@ -43,23 +43,23 @@ type Glasses struct {
 }
 
 // Enum
-type GlassesStatus int
+type GlassesStatus string
 
 const (
-	Tersedia GlassesStatus = iota
-	Terjual
-	Rusak
-	Terpinjam
-	Lainnya
+	Tersedia  GlassesStatus = "Tersedia"
+	Terjual   GlassesStatus = "Terjual"
+	Rusak     GlassesStatus = "Rusak"
+	Terpinjam GlassesStatus = "Terpinjam"
+	Lainnya   GlassesStatus = "Lainnya"
 )
 
-func (s GlassesStatus) String() string {
-	return [...]string{"Tersedia", "Terjual", "Rusak", "Terpinjam", "Lainnya"}[s]
-}
+// func (s GlassesStatus) String() string {
+// 	return [...]string{"Tersedia", "Terjual", "Rusak", "Terpinjam", "Lainnya"}[s]
+// }
 
 type StatusHistory struct {
 	gorm.Model
-	StatusChange GlassesStatus `json:"statusChange"`
+	StatusChange GlassesStatus `json:"statusChange" gorm:"type:varchar(20);not null"`
 	GlassesID    uint          `json:"glassesId"`
 	UserID       uint          `json:"userId"`
 	Glasses      Glasses       `json:"glasses"`
