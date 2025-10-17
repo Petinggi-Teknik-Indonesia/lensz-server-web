@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,13 +14,17 @@ var upgrader = websocket.Upgrader{
 
 func ServeWs(hub *Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log.Println("🔌 New WebSocket connection attempt...")
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
+			log.Println("❌ Upgrade failed:", err)
 			return
 		}
 
 		client := &Client{Hub: hub, Conn: conn, Send: make(chan []byte, 256)}
 		hub.Register <- client
+
+		log.Println("✅ WebSocket connected:", conn.RemoteAddr())
 
 		go client.WritePump()
 		go client.ReadPump()

@@ -47,5 +47,5 @@ func main() {
     })
 
     log.Println("🚀 Server running on :" + cfg.ServerPort)
-    r.Run(":" + cfg.ServerPort)
+    r.Run("0.0.0.0:" + cfg.ServerPort)
 }

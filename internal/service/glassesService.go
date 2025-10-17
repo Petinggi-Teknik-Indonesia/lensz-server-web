@@ -1,9 +1,10 @@
-//often called usecase
+// often called usecase
 package service
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/repository"
 )
@@ -22,9 +23,10 @@ func (s *GlassesService) CreateBrand(ctx context.Context, g *model.Brand) error{
 
 func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) error {
 	// ---- HANDLE BRAND ----
-	if g.BrandID != 0 {
+	fmt.Println(g);
+	if g.Brand.ID != 0 {
 		// check existing brand
-		brand, err := s.repo.FindBrandByID(ctx, g.BrandID)
+		brand, err := s.repo.FindBrandByID(ctx, g.Brand.ID)
 		if err != nil {
 			return errors.New("brand not found")
 		}
@@ -40,8 +42,8 @@ func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) er
 	}
 
 	// ---- HANDLE COMPANY ----
-	if g.CompanyID != 0 {
-		company, err := s.repo.FindCompanyByID(ctx, g.CompanyID)
+	if g.Company.ID != 0 {
+		company, err := s.repo.FindCompanyByID(ctx, g.Company.ID)
 		if err != nil {
 			return errors.New("company not found")
 		}
@@ -56,8 +58,8 @@ func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) er
 	}
 
 	// ---- HANDLE DRAWER ----
-	if g.DrawerID != 0 {
-		drawer, err := s.repo.FindDrawerByID(ctx, g.DrawerID)
+	if g.Drawer.ID != 0 {
+		drawer, err := s.repo.FindDrawerByID(ctx, g.Drawer.ID)
 		if err != nil {
 			return errors.New("drawer not found")
 		}
