@@ -91,6 +91,16 @@ func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id ui
 	return &result, nil
 }
 
+func (r *GlassesRepository) FindGlassesByRFID(ctx context.Context, rfid string) (*model.Glasses, error) {
+	var glasses model.Glasses
+	if err := r.db.WithContext(ctx).
+		Where("rf_id = ?", rfid).
+		First(&glasses).Error; err != nil {
+		return nil, err
+	}
+	return &glasses, nil
+}
+
 // Update Glasses
 func (r *GlassesRepository) UpdateGlasses(ctx context.Context, glasses *model.Glasses) error {
 	return r.db.WithContext(ctx).Save(glasses).Error

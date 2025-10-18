@@ -10,15 +10,12 @@ import (
 )
 
 type GlassesService struct {
-	repo *repository.GlassesRepository
+	repo        *repository.GlassesRepository
+	historyRepo *repository.HistoryRepository
 }
 
-func NewGlassesService(repo *repository.GlassesRepository) *GlassesService {
-	return &GlassesService{repo: repo}
-}
-
-func (s *GlassesService) CreateBrand(ctx context.Context, g *model.Brand) error{
-	return s.repo.CreateBrand(ctx,g)
+func NewGlassesService(repo *repository.GlassesRepository, historyRepo *repository.HistoryRepository) *GlassesService {
+	return &GlassesService{repo: repo, historyRepo: historyRepo}
 }
 
 func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) error {
@@ -72,9 +69,18 @@ func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) er
 	} else {
 		return errors.New("drawer is required (id or name)")
 	}
+	// ---- Create Glasses ----
+	if err := s.repo.CreateGlasses(ctx, g); err != nil {
+		return err
+	}
 
-	// ---- Finally create the glasses ----
-	return s.repo.CreateGlasses(ctx, g)
+	// logging
+	history := &model.StatusHistory{
+		StatusChange: g.Status,
+		GlassesID:    g.ID,
+		UserID:       1, // dummy
+	}
+	return s.historyRepo.CreateHistory(ctx, history)
 }
 
 func (s *GlassesService) GetGlassesByID(ctx context.Context, id uint) (*model.Glasses, error) {
@@ -97,7 +103,48 @@ func (s *GlassesService) GetGlassesSimplifiedByID(ctx context.Context, id uint) 
 
 
 func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) error {
-	return s.repo.UpdateGlasses(ctx, g)
+	existing, err := s.repo.FindGlassesByID(ctx, g.ID)
+	if err != nil {
+		return errors.New("glasses not found")
+	}
+
+	statusChanged := existing.Status != g.Status
+	if err := s.repo.UpdateGlasses(ctx, g); err != nil {
+		return err
+	}
+
+	if statusChanged {
+		history := &model.StatusHistory{
+			StatusChange: g.Status,
+			GlassesID:    g.ID,
+			UserID:       1, // TODO: replace with actual user
+		}
+		return s.historyRepo.CreateHistory(ctx, history)
+	}
+
+	return nil
+}
+
+func (s *GlassesService) UpdateGlassesStatusByRFID(ctx context.Context, rfid string, newStatus model.GlassesStatus) error {
+	// Find glasses by RFID
+	glasses, err := s.repo.FindGlassesByRFID(ctx, rfid)
+	if err != nil {
+		return errors.New("glasses not found for given RFID")
+	}
+
+	// Update status only
+	glasses.Status = newStatus
+	if err := s.repo.UpdateGlasses(ctx, glasses); err != nil {
+		return err
+	}
+
+	// Log the change
+	history := &model.StatusHistory{
+		StatusChange: newStatus,
+		GlassesID:    glasses.ID,
+		UserID:       1, // TODO: from auth
+	}
+	return s.historyRepo.CreateHistory(ctx, history)
 }
 
 func (s *GlassesService) DeleteGlasses(ctx context.Context, id uint) error {

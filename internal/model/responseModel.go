@@ -23,3 +23,11 @@ type GlassesSingleResponse struct {
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 }
+
+type StatusHistoryResponse struct {
+	ID           uint   `json:"id"`
+	StatusChange string `json:"statusChange"`
+	GlassesID    uint   `json:"glassesId"`
+	UserName     string `json:"userName"`
+	CreatedAt    string `json:"createdAt"`
+}
