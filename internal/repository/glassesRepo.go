@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"lensz-server-web/internal/model"
+	"log"
 
 	"gorm.io/gorm"
 )
@@ -55,6 +56,7 @@ func (r *GlassesRepository) FindAllGlassesPartial(ctx context.Context) ([]model.
 		Select("glasses.id, glasses.name, glasses.color, glasses.status, brands.name as brand, drawers.name as drawer").
 		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
 		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
+		Where("glasses.deleted_at IS NULL").
 		Scan(&result).Error
 
 	return result, err
@@ -82,7 +84,7 @@ func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id ui
 		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
 		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
 		Joins("LEFT JOIN companies ON companies.id = glasses.company_id").
-		Where("glasses.id = ?", id).
+		Where("glasses.deleted_at IS NULL AND glasses.id = ?", id).
 		Scan(&result).Error
 
 	if err != nil {
@@ -108,7 +110,8 @@ func (r *GlassesRepository) UpdateGlasses(ctx context.Context, glasses *model.Gl
 
 // Delete Glasses
 func (r *GlassesRepository) DeleteGlasses(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Glasses{}, id).Error
+	log.Print(id)
+	return r.db.WithContext(ctx).Delete(&model.Glasses{}).Error
 }
 
 // Find Glasses by Status
