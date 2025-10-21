@@ -31,9 +31,9 @@ type Glasses struct {
 	RFID        *string       `json:"rfid"`
 	Status      GlassesStatus `json:"status" gorm:"type:varchar(20);not null;default:'Tersedia'"`
 
-	DrawerID  uint `json:"-"`
-	BrandID   uint `json:"-"`
-	CompanyID uint `json:"-"`
+	DrawerID  uint `json:"drawerId"`
+	BrandID   uint `json:"brandId"`
+	CompanyID uint `json:"companyId"`
 
 	Drawer  Drawer  `json:"drawer"`
 	Brand   Brand   `json:"brand"`

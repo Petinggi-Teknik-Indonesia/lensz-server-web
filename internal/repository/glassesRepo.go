@@ -80,9 +80,9 @@ func (r *GlassesRepository) FindGlassesSimplifiedByID(ctx context.Context, id ui
 			companies.name as company,
 			glasses.created_at,
 			glasses.updated_at,
-			drawer.id,
-			brand.id,
-			company.id
+			drawer_id,
+			brand_id,
+			company_id
 		`).
 		Joins("LEFT JOIN drawers ON drawers.id = glasses.drawer_id").
 		Joins("LEFT JOIN brands ON brands.id = glasses.brand_id").
@@ -114,7 +114,7 @@ func (r *GlassesRepository) UpdateGlasses(ctx context.Context, glasses *model.Gl
 // Delete Glasses
 func (r *GlassesRepository) DeleteGlasses(ctx context.Context, id uint) error {
 	log.Print(id)
-	return r.db.WithContext(ctx).Delete(&model.Glasses{}).Error
+	return r.db.WithContext(ctx).Delete(&model.Glasses{}, id).Error
 }
 
 // Find Glasses by Status
