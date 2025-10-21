@@ -27,10 +27,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	// ✅ Setup all routes below
 	historyRepo := repository.NewHistoryRepository(db)
 	historyService := service.NewHistoryService(historyRepo)
-	
+
 	glassesRepo := repository.NewGlassesRepository(db)
 	glassesService := service.NewGlassesService(glassesRepo, historyRepo)
-	
+
 	historyHandler := handler.NewHistoryHandler(historyService, glassesService)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 
@@ -38,8 +38,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
-
-
 
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
@@ -50,6 +48,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		websocket.POST("/scan", scannerHandler.Scan)
 		websocket.POST("/complete", scannerHandler.CompleteRegistration)
 		websocket.POST("/cancel", scannerHandler.CancelRegistration)
+
+		websocket.PATCH("/status", historyHandler.UpdateStatusByRFID)
 	}
 
 	// API
@@ -68,7 +68,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 			glasses.DELETE("/:id", glassesHandler.Delete)
 
 			glasses.GET("/:id/history", historyHandler.GetByGlassesID)
-			glasses.PATCH("/status", historyHandler.UpdateStatusByRFID)
 		}
 
 		drawers := api.Group("/drawers")

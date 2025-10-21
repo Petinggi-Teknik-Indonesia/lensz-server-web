@@ -22,6 +22,9 @@ type GlassesSingleResponse struct {
 	Company     string `json:"company"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
+	DrawerID    uint   `json:"drawerId"`
+	BrandID     uint   `json:"brandId"`
+	CompanyID   uint   `json:"companyId"`
 }
 
 type StatusHistoryResponse struct {
