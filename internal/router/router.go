@@ -19,11 +19,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 		c.Next()
 	})
 
-	// ✅ Test route for sanity check
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
-
 	// ✅ Setup all routes below
 	historyRepo := repository.NewHistoryRepository(db)
 	historyService := service.NewHistoryService(historyRepo)
@@ -31,7 +26,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	glassesRepo := repository.NewGlassesRepository(db)
 	glassesService := service.NewGlassesService(glassesRepo, historyRepo)
 
-	historyHandler := handler.NewHistoryHandler(historyService, glassesService)
+	historyHandler := handler.NewHistoryHandler(historyService, glassesService,hub)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 
 	scannerHandler := handler.NewScannerHandler(hub)

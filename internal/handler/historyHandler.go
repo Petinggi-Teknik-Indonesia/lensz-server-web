@@ -1,24 +1,28 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/service"
+	"lensz-server-web/internal/ws"
 
 	"github.com/gin-gonic/gin"
 )
 
 type HistoryHandler struct {
-	service *service.HistoryService
-	glassesService *service.GlassesService
+	service         *service.HistoryService
+	glassesService  *service.GlassesService
+	hub             *ws.Hub
 }
 
-func NewHistoryHandler(historyService *service.HistoryService, glassesService *service.GlassesService) *HistoryHandler {
+func NewHistoryHandler(historyService *service.HistoryService, glassesService *service.GlassesService, hub *ws.Hub) *HistoryHandler {
 	return &HistoryHandler{
-		service: historyService,
+		service:        historyService,
 		glassesService: glassesService,
+		hub:            hub,
 	}
 }
 
@@ -55,6 +59,17 @@ func (h *HistoryHandler) UpdateStatusByRFID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// ✅ Broadcast WebSocket update
+	msg := map[string]interface{}{
+		"type": "glasses_status_updated",
+		"payload": map[string]interface{}{
+			"rfid":   req.RFID,
+			"status": req.Status,
+		},
+	}
+	b, _ := json.Marshal(msg)
+	h.hub.Broadcast <- b
 
 	c.JSON(http.StatusOK, gin.H{"message": "status updated successfully"})
 }

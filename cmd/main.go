@@ -42,9 +42,9 @@ func main() {
     router.SetupRoutes(r, db, hub)
 
     // Fallback for OPTIONS (preflight)
-    r.OPTIONS("/*path", func(c *gin.Context) {
-        c.Status(204)
-    })
+    // r.OPTIONS("/*path", func(c *gin.Context) {
+    //     c.Status(204)
+    // })
 
     log.Println("🚀 Server running on :" + cfg.ServerPort)
     r.Run("0.0.0.0:" + cfg.ServerPort)
