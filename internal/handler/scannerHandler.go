@@ -3,16 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"lensz-server-web/internal/ws"
 	"github.com/gin-gonic/gin"
+	"sync"
 )
 
 type ScannerHandler struct {
 	hub *ws.Hub
-	// optionally keep state
 	isRegistering bool
+	mu sync.Mutex
 }
+
+const registerTimeout = 30 * time.Second // example duration
 
 func NewScannerHandler(hub *ws.Hub) *ScannerHandler {
 	return &ScannerHandler{hub: hub}
@@ -27,13 +31,15 @@ func (h *ScannerHandler) Scan(c *gin.Context) {
 		return
 	}
 
-	// Option 1: block new scans if registration in progress
+	h.mu.Lock()
 	if h.isRegistering {
+		h.mu.Unlock()
 		c.JSON(http.StatusConflict, gin.H{"message": "Registration in progress"})
 		return
 	}
+	h.isRegistering = true
+	h.mu.Unlock()
 
-	// Notify frontends
 	msg := map[string]interface{}{
 		"type": "rfid_scanned",
 		"payload": map[string]string{
@@ -43,17 +49,36 @@ func (h *ScannerHandler) Scan(c *gin.Context) {
 	b, _ := json.Marshal(msg)
 	h.hub.Broadcast <- b
 
-	h.isRegistering = true
+	// start auto timeout watcher
+	go h.autoTimeout()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Scan received"})
 }
 
-// endpoint for frontend to mark registration done
+func (h *ScannerHandler) autoTimeout() {
+	time.Sleep(registerTimeout)
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	if h.isRegistering {
+		h.isRegistering = false
+		// optionally tell FE
+		msg := map[string]string{"type": "registration_timeout"}
+		b, _ := json.Marshal(msg)
+		h.hub.Broadcast <- b
+	}
+}
+
 func (h *ScannerHandler) CompleteRegistration(c *gin.Context) {
+	h.mu.Lock()
 	h.isRegistering = false
+	h.mu.Unlock()
 	c.JSON(http.StatusOK, gin.H{"message": "Registration completed"})
 }
+
 func (h *ScannerHandler) CancelRegistration(c *gin.Context) {
+	h.mu.Lock()
 	h.isRegistering = false
-	c.JSON(http.StatusAccepted, gin.H{"message": "Registration completed"})
+	h.mu.Unlock()
+	c.JSON(http.StatusAccepted, gin.H{"message": "Registration canceled"})
 }

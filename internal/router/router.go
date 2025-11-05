@@ -26,13 +26,17 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	glassesRepo := repository.NewGlassesRepository(db)
 	glassesService := service.NewGlassesService(glassesRepo, historyRepo)
 
-	historyHandler := handler.NewHistoryHandler(historyService, glassesService,hub)
+	historyHandler := handler.NewHistoryHandler(historyService, glassesService, hub)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 
 	scannerHandler := handler.NewScannerHandler(hub)
 
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
+
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
 
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
@@ -50,14 +54,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	// API
 	api := r.Group("/api")
 	{
-		api.GET("/", func(c *gin.Context) {
+		api.GET("", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "pong"})
 		})
 
 		glasses := api.Group("/glasses")
 		{
-			glasses.POST("/", glassesHandler.Create)
-			glasses.GET("/", glassesHandler.GetAll)
+			glasses.POST("", glassesHandler.Create)
+			glasses.GET("", glassesHandler.GetAll)
 			glasses.GET("/:id", glassesHandler.GetByID)
 			glasses.PUT("/:id", glassesHandler.Update)
 			glasses.DELETE("/:id", glassesHandler.Delete)
@@ -67,7 +71,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 
 		drawers := api.Group("/drawers")
 		{
-			drawers.POST("/", dependencyHandler.CreateDrawer)
+			drawers.POST("", dependencyHandler.CreateDrawer)
 			drawers.GET("/", dependencyHandler.GetAllDrawers)
 			drawers.GET("/:id", dependencyHandler.GetDrawerByID)
 			drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
@@ -76,8 +80,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 
 		brands := api.Group("/brands")
 		{
-			brands.POST("/", dependencyHandler.CreateBrand)
-			brands.GET("/", dependencyHandler.GetAllBrands)
+			brands.POST("", dependencyHandler.CreateBrand)
+			brands.GET("", dependencyHandler.GetAllBrands)
 			brands.GET("/:id", dependencyHandler.GetBrandByID)
 			brands.PUT("/:id", dependencyHandler.UpdateBrand)
 			brands.DELETE("/:id", dependencyHandler.DeleteBrand)
@@ -85,11 +89,16 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 
 		companies := api.Group("/companies")
 		{
-			companies.POST("/", dependencyHandler.CreateCompany)
-			companies.GET("/", dependencyHandler.GetAllCompanies)
+			companies.POST("", dependencyHandler.CreateCompany)
+			companies.GET("", dependencyHandler.GetAllCompanies)
 			companies.GET("/:id", dependencyHandler.GetCompanyByID)
 			companies.PUT("/:id", dependencyHandler.UpdateCompany)
 			companies.DELETE("/:id", dependencyHandler.DeleteCompany)
+		}
+		users := api.Group("/users")
+		{
+			users.POST("/register", userHandler.Register)
+			users.POST("/login", userHandler.Login)
 		}
 	}
 }
