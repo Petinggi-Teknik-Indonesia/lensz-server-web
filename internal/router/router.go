@@ -34,10 +34,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
 
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
-
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
 
@@ -95,10 +91,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub) {
 			companies.PUT("/:id", dependencyHandler.UpdateCompany)
 			companies.DELETE("/:id", dependencyHandler.DeleteCompany)
 		}
-		users := api.Group("/users")
-		{
-			users.POST("/register", userHandler.Register)
-			users.POST("/login", userHandler.Login)
-		}
+		// users := api.Group("/users")
+		// {
+		// 	users.POST("/register", userHandler.Register)
+		// 	users.POST("/login", userHandler.Login)
+		// }
 	}
 }
