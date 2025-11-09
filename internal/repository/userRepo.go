@@ -35,6 +35,30 @@ func (r *UserRepository) FindUserByID(ctx context.Context, id uint) (*model.User
 	return &user, nil
 }
 
+func (r *UserRepository) FindUserUnverified(ctx context.Context, organization model.Organization) ([]model.User, error) {
+	var user []model.User
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 0}).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (r *UserRepository) FindAllUnverified(ctx context.Context) ([]model.User, error) {
+	var user []model.User
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(&model.User{VerifiedStatus: 0}).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (r *UserRepository) FindUserVerified(ctx context.Context, organization model.Organization) ([]model.User, error) {
+	var user []model.User
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 1}).Find(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // ---------------- ORGANIZATION ---------------
 func (r *UserRepository) CreateOrganization(ctx context.Context, organization  *model.Organization) error {
 	return r.db.WithContext(ctx).Create(organization).Error
