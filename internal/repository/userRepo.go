@@ -37,7 +37,7 @@ func (r *UserRepository) FindUserByID(ctx context.Context, id uint) (*model.User
 
 func (r *UserRepository) FindUserUnverified(ctx context.Context, organization *model.Organization) ([]model.User, error) {
 	var user []model.User
-	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 0}).Find(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: false}).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -60,7 +60,7 @@ func (r *UserRepository) DeleteUser(ctx context.Context, userVerify *model.User)
 
 func (r *UserRepository) FindAllUnverified(ctx context.Context) ([]model.User, error) {
 	var user []model.User
-	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(&model.User{VerifiedStatus: 0}).Find(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(&model.User{VerifiedStatus: false}).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -68,14 +68,14 @@ func (r *UserRepository) FindAllUnverified(ctx context.Context) ([]model.User, e
 
 func (r *UserRepository) FindUserVerified(ctx context.Context, organization *model.Organization) ([]model.User, error) {
 	var user []model.User
-	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 1}).Find(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: true}).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 func (r *UserRepository) FindAllVerified(ctx context.Context) ([]model.User, error) {
 	var user []model.User
-	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(&model.User{VerifiedStatus: 1}).Find(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(&model.User{VerifiedStatus: true}).Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil

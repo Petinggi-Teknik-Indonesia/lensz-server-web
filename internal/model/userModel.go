@@ -1,8 +1,8 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Role struct {
@@ -17,17 +17,17 @@ type User struct {
 	Email          string `json:"email" gorm:"uniqueIndex;not null"`
 	Phone          string `json:"phone"`
 	Password       string `json:"-" gorm:"not null"`
-	VerifiedStatus int 	  `json:"verifiedStatus" gorm:"default:'0'"`
-	RoleID         uint   `json:"roleId"`
-	Role           Role   `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	OrganizationID uint   `json:"organizationId"`
+	VerifiedStatus bool   `json:"verifiedStatus" gorm:"default:false"`
+	RoleID         uint `json:"roleId"`
+	Role           Role `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	OrganizationID uint `json:"organizationId"`
 }
 
 type Organization struct {
 	gorm.Model
-	Name     string     `json:"name"`
-	Scanners []Scanner  `json:"scanners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	User     []User     `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Name     string    `json:"name"`
+	Scanners []Scanner `json:"scanners" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	User     []User    `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 // HashPassword generates a bcrypt hash
