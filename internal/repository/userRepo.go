@@ -35,7 +35,7 @@ func (r *UserRepository) FindUserByID(ctx context.Context, id uint) (*model.User
 	return &user, nil
 }
 
-func (r *UserRepository) FindUserUnverified(ctx context.Context, organization model.Organization) ([]model.User, error) {
+func (r *UserRepository) FindUserUnverified(ctx context.Context, organization *model.Organization) ([]model.User, error) {
 	var user []model.User
 	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 0}).Find(&user).Error; err != nil {
 		return nil, err
@@ -43,12 +43,19 @@ func (r *UserRepository) FindUserUnverified(ctx context.Context, organization mo
 	return user, nil
 }
 
-func (r *UserRepository) VerifyUser(ctx context.Context, userVerify model.User) (*model.User, error) {
+func (r *UserRepository) UpdateUser(ctx context.Context, userVerify *model.User) (*model.User, error) {
 	var user model.User
-	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(userVerify).Find(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Save(userVerify).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
+}
+func (r *UserRepository) DeleteUser(ctx context.Context, userVerify *model.User) ( error) {
+
+	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Delete(userVerify).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *UserRepository) FindAllUnverified(ctx context.Context) ([]model.User, error) {
@@ -59,7 +66,7 @@ func (r *UserRepository) FindAllUnverified(ctx context.Context) ([]model.User, e
 	return user, nil
 }
 
-func (r *UserRepository) FindUserVerified(ctx context.Context, organization model.Organization) ([]model.User, error) {
+func (r *UserRepository) FindUserVerified(ctx context.Context, organization *model.Organization) ([]model.User, error) {
 	var user []model.User
 	if err := r.db.WithContext(ctx).Preload("Role").Preload("Organization").Where(organization).Where(&model.User{VerifiedStatus: 1}).Find(&user).Error; err != nil {
 		return nil, err
