@@ -15,4 +15,4 @@ func NewUserService(repo *repository.UserRepository) *UserService{
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) Register
+func (s *UserService) Register(ctx contect.Context)

@@ -17,8 +17,9 @@ type User struct {
 	Email          string `json:"email" gorm:"uniqueIndex;not null"`
 	Phone          string `json:"phone"`
 	Password       string `json:"-" gorm:"not null"`
+	VerifiedStatus int 	  `json:"verifiedStatus" gorm:"default:'0'"`
 	RoleID         uint   `json:"roleId"`
-	Role           Role   `json:"role"or gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Role           Role   `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	OrganizationID uint   `json:"organizationId"`
 }
 
