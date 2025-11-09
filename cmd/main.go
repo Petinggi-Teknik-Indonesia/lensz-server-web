@@ -39,7 +39,7 @@ func main() {
     hub := ws.NewHub()
     go hub.Run()
 
-    router.SetupRoutes(r, db, hub)
+    router.SetupRoutes(r, db, hub, cfg.JWTSecret)
 
     // Fallback for OPTIONS (preflight)
     // r.OPTIONS("/*path", func(c *gin.Context) {

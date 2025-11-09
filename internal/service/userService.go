@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/repository"
 	"time"
@@ -12,10 +11,12 @@ import (
 )
 
 type UserService struct {
-	repo *repository.UserRepository
+	repo      *repository.UserRepository
+	jwtSecret string
 }
-func NewUserService(repo *repository.UserRepository) *UserService{
-	return &UserService{repo: repo}
+
+func NewUserService(repo *repository.UserRepository, jwtSecret string) *UserService {
+	return &UserService{repo: repo, jwtSecret: jwtSecret}
 }
 
 func (s *UserService) Register(ctx context.Context, u *model.User) error {
@@ -65,29 +66,36 @@ func (s *UserService) CancelUser(ctx context.Context, email string) error {
 }
 
 // Login (for both users and admins)
-func (s *UserService) Login(ctx context.Context, email, password string) (*model.User, error) {
+// Login (for both users and admins)
+func (s *UserService) Login(ctx context.Context, email, password string) (string, error) {
 	user, err := s.repo.FindUserByEmail(ctx, email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
 	if !user.CheckPassword(password) {
-		return nil, errors.New("invalid email or password")
+		return "", errors.New("invalid email or password")
 	}
 
-	if user.VerifiedStatus {
-		return nil, errors.New("account not yet verified by admin")
+	if !user.VerifiedStatus {
+		return "", errors.New("account not yet verified by admin")
 	}
 
-	 token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
-        jwt.MapClaims{ 
-        "id": user.ID, 
-        "role": user.RoleID, 
-        "exp": time.Now().Add(time.Hour * 24).Unix(), 
-        })
-	fmt.Print(token)
+	// Create JWT claims
+	claims := jwt.MapClaims{
+		"id":    user.ID,
+		"role":  user.RoleID,
+		"email": user.Email,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+	}
 
-	return user, nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(s.jwtSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 // Fetch all unverified users
@@ -103,6 +111,7 @@ func (s *UserService) GetUnverifiedByOrg(ctx context.Context, orgID uint) ([]mod
 	}
 	return s.repo.FindUserUnverified(ctx, org)
 }
+
 // Fetch verified users in specific organization
 func (s *UserService) GetVerifiedByOrg(ctx context.Context, orgID uint) ([]model.User, error) {
 	org, err := s.repo.FindOrganizationByID(ctx, orgID)
