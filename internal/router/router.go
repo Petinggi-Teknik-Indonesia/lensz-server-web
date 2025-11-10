@@ -1,17 +1,16 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"lensz-server-web/internal/handler"
+	"lensz-server-web/internal/middleware"
 	"lensz-server-web/internal/repository"
 	"lensz-server-web/internal/service"
-	"lensz-server-web/internal/middleware"
 	"lensz-server-web/internal/ws"
 	"log"
 	"net/http"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
-
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	// ✅ Log every incoming request
@@ -35,10 +34,16 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
 
-		userRepo := repository.NewUserRepository(db)
+	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo, jwtSecret)
 	userHandler := handler.NewUserHandler(userService)
+	roleRepo := repository.NewRoleRepository(db)
+	roleService := service.NewRoleService(roleRepo)
+	roleHandler := handler.NewRoleHandler(roleService)
 
+	orgRepo := repository.NewOrganizationRepository(db)
+	orgService := service.NewOrganizationService(orgRepo)
+	orgHandler := handler.NewOrganizationHandler(orgService)
 
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
@@ -66,7 +71,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			users.POST("/login", userHandler.Login)
 
 			// admin-only routes
-			admin := users.Group("/")
+			admin := users.Group("/admin")
 			admin.Use(middleware.JWTAuthMiddleware(jwtSecret))
 			{
 				admin.POST("/admin-register", userHandler.AdminRegister)
@@ -116,10 +121,23 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			companies.PUT("/:id", dependencyHandler.UpdateCompany)
 			companies.DELETE("/:id", dependencyHandler.DeleteCompany)
 		}
-		// users := api.Group("/users")
-		// {
-		// 	users.POST("/register", userHandler.Register)
-		// 	users.POST("/login", userHandler.Login)
-		// }
+		roles := api.Group("/roles")
+		{
+			roles.POST("/", roleHandler.Create)
+			roles.GET("/", roleHandler.GetAll)
+			roles.GET("/:id", roleHandler.GetByID)
+			roles.PUT("/:id", roleHandler.Update)
+			roles.DELETE("/:id", roleHandler.Delete)
+		}
+
+		orgs := api.Group("/organizations")
+		{
+			orgs.POST("/", orgHandler.Create)
+			orgs.GET("/", orgHandler.GetAll)
+			orgs.GET("/:id", orgHandler.GetByID)
+			orgs.PUT("/:id", orgHandler.Update)
+			orgs.DELETE("/:id", orgHandler.Delete)
+		}
+
 	}
 }
