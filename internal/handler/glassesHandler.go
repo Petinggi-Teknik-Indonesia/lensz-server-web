@@ -2,71 +2,81 @@ package handler
 
 import (
 	"net/http"
-	"lensz-server-web/internal/domain/models"
+	"strconv"
+	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type ItemHandler struct {
-	service service.ItemService
+type GlassesHandler struct {
+	service *service.GlassesService
 }
 
-func NewItemHandler(service service.ItemService) *ItemHandler {
-	return &ItemHandler{service: service}
+func NewGlassesHandler(service *service.GlassesService) *GlassesHandler {
+	return &GlassesHandler{service: service}
 }
 
-func (h *ItemHandler) GetItems(c *gin.Context) {
-	items, err := h.service.GetAll()
+// POST /glasses
+func (h *GlassesHandler) Create(c *gin.Context) {
+	var req model.Glasses
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.CreateGlasses(c, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, req)
+}
+
+// GET /glasses/:id
+func (h *GlassesHandler) GetByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	glasses, err := h.service.GetGlassesSimplifiedByID(c, uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, glasses)
+}
+
+// GET /glasses
+func (h *GlassesHandler) GetAll(c *gin.Context) {
+	glasses, err := h.service.GetAllGlassesPartial(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, items)
+	c.JSON(http.StatusOK, glasses)
 }
 
-func (h *ItemHandler) GetItem(c *gin.Context) {
-	id := c.Param("id")
-	item, err := h.service.GetByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
+// PUT /glasses/:id
+func (h *GlassesHandler) Update(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	var req model.Glasses
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, item)
+	req.ID = uint(id)
+
+	if err := h.service.UpdateGlasses(c, &req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, req)
 }
 
-func (h *ItemHandler) CreateItem(c *gin.Context) {
-	var item models.Item
-	if err := c.ShouldBindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// DELETE /glasses/:id
+func (h *GlassesHandler) Delete(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+	if err := h.service.DeleteGlasses(c, uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.service.Create(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusCreated, item)
-}
-
-func (h *ItemHandler) UpdateItem(c *gin.Context) {
-	id := c.Param("id")
-	var updated models.Item
-	if err := c.ShouldBindJSON(&updated); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if err := h.service.Update(id, &updated); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "item updated"})
-}
-
-func (h *ItemHandler) DeleteItem(c *gin.Context) {
-	id := c.Param("id")
-	if err := h.service.Delete(id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "item deleted"})
+	c.Status(http.StatusNoContent)
 }
