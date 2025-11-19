@@ -26,13 +26,15 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.actor }}/lensz-backend:latest
+          USERNAME=$(echo "${{ github.actor }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=ghcr.io/$USERNAME/lensz-backend:latest
           echo "Building $IMAGE_NAME"
           docker build -t $IMAGE_NAME .
 
       - name: Push Docker image
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.actor }}/lensz-backend:latest
+          USERNAME=$(echo "${{ github.actor }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME=ghcr.io/$USERNAME/lensz-backend:latest
           echo "Pushing $IMAGE_NAME"
           docker push $IMAGE_NAME
 
