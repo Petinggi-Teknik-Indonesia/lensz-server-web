@@ -1,4 +1,4 @@
-name: Build & Push to GHCR
+name: Build & Deploy
 
 on:
   push:
@@ -14,10 +14,10 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Login to GHCR
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -26,18 +26,22 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner,, }}/lensz-backend:latest .
+          IMAGE_NAME=ghcr.io/${{ github.actor }}/lensz-backend:latest
+          echo "Building $IMAGE_NAME"
+          docker build -t $IMAGE_NAME .
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository_owner,, }}/lensz-backend:latest
+          IMAGE_NAME=ghcr.io/${{ github.actor }}/lensz-backend:latest
+          echo "Pushing $IMAGE_NAME"
+          docker push $IMAGE_NAME
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH into server and deploy
+      - name: Deploy to Droplet
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -45,4 +49,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /root/lensz-backend
-            ./deploy.sh
+            docker compose pull
+            docker compose up -d
+            docker system prune -f
