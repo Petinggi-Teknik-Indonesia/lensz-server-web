@@ -1,0 +1,29 @@
+# Build artifacts
+/bin
+/build
+/server
+
+# Dependencies
+vendor/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore

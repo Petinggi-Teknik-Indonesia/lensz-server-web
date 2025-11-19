@@ -12,16 +12,19 @@ type Role struct {
 }
 
 type User struct {
-	gorm.Model
-	Name           string `json:"name"`
-	Email          string `json:"email" gorm:"uniqueIndex;not null"`
-	Phone          string `json:"phone"`
-	Password       string `json:"-" gorm:"not null"`
-	VerifiedStatus bool   `json:"verifiedStatus" gorm:"default:false"`
-	RoleID         uint `json:"roleId"`
-	Role           Role `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	OrganizationID uint `json:"organizationId"`
+    gorm.Model
+    Name           string `json:"name"`
+    Email          string `json:"email" gorm:"uniqueIndex;not null"`
+    Phone          string `json:"phone"`
+    Password       string `json:"-" gorm:"not null"`
+    VerifiedStatus bool   `json:"verifiedStatus" gorm:"default:false"`
+    RoleID         uint   `json:"roleId"`
+    Role           Role   `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
+    OrganizationID uint         `json:"organizationId"`
+    Organization   Organization `json:"organization" gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
+
 
 type Organization struct {
 	gorm.Model

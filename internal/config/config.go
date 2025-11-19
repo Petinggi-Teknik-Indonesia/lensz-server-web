@@ -12,14 +12,18 @@ import (
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	ServerPort string
-	JWTSecret  string
+	DBHost        string
+	DBPort        string
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	ServerPort    string
+	JWTSecret     string
+	AdminEmail    string
+	AdminPassword string
+	AdminName     string
 }
+
 
 func Load() Config {
 	// Try to load .env if available
@@ -29,13 +33,16 @@ func Load() Config {
 	}
 
 	return Config{
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBName:     os.Getenv("DB_NAME"),
-		ServerPort: os.Getenv("SERVER_PORT"),
-		JWTSecret: os.Getenv("JWT_SECRET"),
+		DBHost:        os.Getenv("DB_HOST"),
+		DBPort:        os.Getenv("DB_PORT"),
+		DBUser:        os.Getenv("DB_USER"),
+		DBPassword:    os.Getenv("DB_PASSWORD"),
+		DBName:        os.Getenv("DB_NAME"),
+		ServerPort:    os.Getenv("SERVER_PORT"),
+		JWTSecret:     os.Getenv("JWT_SECRET"),
+		AdminEmail:    os.Getenv("ADMIN_EMAIL"),
+		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
+		AdminName:     os.Getenv("ADMIN_NAME"),
 	}
 }
 

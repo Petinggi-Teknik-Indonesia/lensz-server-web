@@ -1,51 +1,57 @@
 package main
 
 import (
-    "log"
+	"log"
 
-    "lensz-server-web/internal/config"
-    "lensz-server-web/internal/router"
-    "lensz-server-web/internal/ws"
+	"context"
+	"lensz-server-web/internal/config"
+	"lensz-server-web/internal/router"
+	"lensz-server-web/internal/ws"
 
-    "github.com/gin-contrib/cors"
-    "github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    cfg := config.Load()
+	cfg := config.Load()
 
-    db, err := config.InitDB(cfg)
-    if err != nil {
-        log.Fatal(err)
-    }
+	db, err := config.InitDB(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    // 🔧 Disable automatic redirect for trailing slash
-    r := gin.New()
-    r.RedirectTrailingSlash = false
-    r.Use(gin.Logger(), gin.Recovery())
+	// Run DB seeder
+	if err := config.SeedDatabase(context.Background(), db, cfg); err != nil {
+		log.Fatalf("❌ Database seeding failed: %v", err)
+	}
 
-    // ✅ Global CORS (applies to everything)
-    r.Use(cors.New(cors.Config{
-        AllowOrigins: []string{
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-        },
-        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-    }))
+	// 🔧 Disable automatic redirect for trailing slash
+	r := gin.New()
+	r.RedirectTrailingSlash = false
+	r.Use(gin.Logger(), gin.Recovery())
 
-    hub := ws.NewHub()
-    go hub.Run()
+	// ✅ Global CORS (applies to everything)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"http://127.0.0.1:5173",
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
-    router.SetupRoutes(r, db, hub, cfg.JWTSecret)
+	hub := ws.NewHub()
+	go hub.Run()
 
-    // Fallback for OPTIONS (preflight)
-    // r.OPTIONS("/*path", func(c *gin.Context) {
-    //     c.Status(204)
-    // })
+	router.SetupRoutes(r, db, hub, cfg.JWTSecret)
 
-    log.Println("🚀 Server running on :" + cfg.ServerPort)
-    r.Run("0.0.0.0:" + cfg.ServerPort)
+	// Fallback for OPTIONS (preflight)
+	// r.OPTIONS("/*path", func(c *gin.Context) {
+	//     c.Status(204)
+	// })
+
+	log.Println("🚀 Server running on :" + cfg.ServerPort)
+	r.Run("0.0.0.0:" + cfg.ServerPort)
 }
