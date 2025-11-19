@@ -80,6 +80,7 @@ func (s *UserService) Login(ctx context.Context, email, password string) (string
 	if !user.VerifiedStatus {
 		return "", errors.New("account not yet verified by admin")
 	}
+	
 
 	// Create JWT claims
 	claims := jwt.MapClaims{
