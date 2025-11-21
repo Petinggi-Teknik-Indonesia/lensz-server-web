@@ -98,7 +98,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		drawers := api.Group("/drawers")
 		{
 			drawers.POST("", dependencyHandler.CreateDrawer)
-			drawers.GET("/", dependencyHandler.GetAllDrawers)
+			drawers.GET("", dependencyHandler.GetAllDrawers)
 			drawers.GET("/:id", dependencyHandler.GetDrawerByID)
 			drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
 			drawers.DELETE("/:id", dependencyHandler.DeleteDrawer)
@@ -123,8 +123,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 		roles := api.Group("/roles")
 		{
-			roles.POST("/", roleHandler.Create)
-			roles.GET("/", roleHandler.GetAll)
+			roles.POST("", roleHandler.Create)
+			roles.GET("", roleHandler.GetAll)
 			roles.GET("/:id", roleHandler.GetByID)
 			roles.PUT("/:id", roleHandler.Update)
 			roles.DELETE("/:id", roleHandler.Delete)
@@ -132,8 +132,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 
 		orgs := api.Group("/organizations")
 		{
-			orgs.POST("/", orgHandler.Create)
-			orgs.GET("/", orgHandler.GetAll)
+			orgs.POST("", orgHandler.Create)
+			orgs.GET("", orgHandler.GetAll)
 			orgs.GET("/:id", orgHandler.GetByID)
 			orgs.PUT("/:id", orgHandler.Update)
 			orgs.DELETE("/:id", orgHandler.Delete)
