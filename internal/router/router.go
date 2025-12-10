@@ -98,7 +98,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		drawers := api.Group("/drawers")
 		{
 			drawers.POST("", dependencyHandler.CreateDrawer)
-			drawers.GET("/", dependencyHandler.GetAllDrawers)
+			drawers.GET("", dependencyHandler.GetAllDrawers)
 			drawers.GET("/:id", dependencyHandler.GetDrawerByID)
 			drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
 			drawers.DELETE("/:id", dependencyHandler.DeleteDrawer)
