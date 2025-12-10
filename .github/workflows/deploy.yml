@@ -39,14 +39,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Droplet
+      - name: Debug SSH key format
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" | ssh-keygen -y || echo "INVALID SSH PRIVATE KEY!"
+      
+      - name: Test raw SSH connection (no command)
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /root/lensz-backend
-            docker compose pull
-            docker compose up -d
-            docker system prune -f
+          script: echo "CONNECTED OK"
+          timeout: 60s
+          command_timeout: 30s
+
