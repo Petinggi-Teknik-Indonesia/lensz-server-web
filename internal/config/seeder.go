@@ -68,6 +68,7 @@ func SeedDatabase(ctx context.Context, db *gorm.DB, cfg Config) error {
 			Password:       string(hashed),
 			RoleID:         backdoorRole.ID,
 			OrganizationID: orgMap["Optic Gembira"].ID,
+			VerifiedStatus: true,
 		}
 
 		if err := db.WithContext(ctx).Create(&adminUser).Error; err != nil {

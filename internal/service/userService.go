@@ -66,7 +66,6 @@ func (s *UserService) CancelUser(ctx context.Context, email string) error {
 }
 
 // Login (for both users and admins)
-// Login (for both users and admins)
 func (s *UserService) Login(ctx context.Context, email, password string) (string, error) {
 	user, err := s.repo.FindUserByEmail(ctx, email)
 	if err != nil {
@@ -87,6 +86,7 @@ func (s *UserService) Login(ctx context.Context, email, password string) (string
 		"id":    user.ID,
 		"role":  user.RoleID,
 		"email": user.Email,
+		"organization": user.OrganizationID,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 

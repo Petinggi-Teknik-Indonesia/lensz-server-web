@@ -72,7 +72,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 
 			// admin-only routes
 			admin := users.Group("/admin")
-			admin.Use(middleware.JWTAuthMiddleware(jwtSecret))
+			admin.Use(middleware.Authenticate(jwtSecret))
 			{
 				admin.POST("/admin-register", userHandler.AdminRegister)
 				admin.PATCH("/verify/:email", userHandler.VerifyUser)
@@ -85,6 +85,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		glasses := api.Group("/glasses")
+		glasses.Use(middleware.Authenticate(jwtSecret))
 		{
 			glasses.POST("", glassesHandler.Create)
 			glasses.GET("", glassesHandler.GetAll)
@@ -96,6 +97,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		drawers := api.Group("/drawers")
+		drawers.Use(middleware.Authenticate(jwtSecret))
 		{
 			drawers.POST("", dependencyHandler.CreateDrawer)
 			drawers.GET("", dependencyHandler.GetAllDrawers)
@@ -105,6 +107,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		brands := api.Group("/brands")
+		brands.Use(middleware.Authenticate(jwtSecret))
 		{
 			brands.POST("", dependencyHandler.CreateBrand)
 			brands.GET("", dependencyHandler.GetAllBrands)
@@ -114,6 +117,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		companies := api.Group("/companies")
+		companies.Use(middleware.Authenticate(jwtSecret))
 		{
 			companies.POST("", dependencyHandler.CreateCompany)
 			companies.GET("", dependencyHandler.GetAllCompanies)
@@ -122,6 +126,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			companies.DELETE("/:id", dependencyHandler.DeleteCompany)
 		}
 		roles := api.Group("/roles")
+		roles.Use(middleware.Authenticate(jwtSecret))
 		{
 			roles.POST("", roleHandler.Create)
 			roles.GET("", roleHandler.GetAll)
@@ -131,6 +136,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		orgs := api.Group("/organizations")
+		orgs.Use(middleware.Authenticate(jwtSecret))
 		{
 			orgs.POST("", orgHandler.Create)
 			orgs.GET("", orgHandler.GetAll)

@@ -9,7 +9,7 @@ import (
 )
 
 // JWTAuthMiddleware checks and validates the JWT token
-func JWTAuthMiddleware(jwtSecret string) gin.HandlerFunc {
+func Authenticate(jwtSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -51,6 +51,7 @@ func JWTAuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		c.Set("user_id", claims["id"])
 		c.Set("role_id", claims["role"])
 		c.Set("email", claims["email"])
+		c.Set("organization_id", claims["organization"])
 
 		c.Next()
 	}
