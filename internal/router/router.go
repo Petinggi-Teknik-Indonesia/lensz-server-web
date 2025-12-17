@@ -54,7 +54,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		websocket.POST("/scan", scannerHandler.Scan)
 		websocket.POST("/complete", scannerHandler.CompleteRegistration)
 		websocket.POST("/cancel", scannerHandler.CancelRegistration)
-
+		websocket.POST("/heartbeat", scannerHandler.Heartbeat)
+		websocket.GET("/devices", scannerHandler.GetDevices)
 		websocket.PATCH("/status", historyHandler.UpdateStatusByRFID)
 	}
 
@@ -83,6 +84,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 				admin.GET("/verified/org/:id", userHandler.GetVerifiedByOrg)
 			}
 		}
+		
 
 		glasses := api.Group("/glasses")
 		glasses.Use(middleware.Authenticate(jwtSecret))
@@ -144,6 +146,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			orgs.PUT("/:id", orgHandler.Update)
 			orgs.DELETE("/:id", orgHandler.Delete)
 		}
+		
 
 	}
 }
