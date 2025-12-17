@@ -72,7 +72,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 
 			// admin-only routes
 			admin := users.Group("/admin")
-			admin.Use(middleware.Authenticate(jwtSecret))
+			admin.Use(middleware.Authenticate(jwtSecret), middleware.RequireRoles(1,2,3))
 			{
 				admin.POST("/admin-register", userHandler.AdminRegister)
 				admin.PATCH("/verify/:email", userHandler.VerifyUser)
@@ -136,10 +136,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		orgs := api.Group("/organizations")
-		orgs.Use(middleware.Authenticate(jwtSecret))
 		{
-			orgs.POST("", orgHandler.Create)
 			orgs.GET("", orgHandler.GetAll)
+			orgs.Use(middleware.Authenticate(jwtSecret))
+			orgs.POST("", orgHandler.Create)
 			orgs.GET("/:id", orgHandler.GetByID)
 			orgs.PUT("/:id", orgHandler.Update)
 			orgs.DELETE("/:id", orgHandler.Delete)
