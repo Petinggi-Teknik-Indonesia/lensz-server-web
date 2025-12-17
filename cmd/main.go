@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"context"
+	// "context"
 	"lensz-server-web/internal/config"
 	"lensz-server-web/internal/router"
 	"lensz-server-web/internal/ws"
@@ -21,9 +21,9 @@ func main() {
 	}
 
 	// Run DB seeder
-	if err := config.SeedDatabase(context.Background(), db, cfg); err != nil {
-		log.Fatalf("❌ Database seeding failed: %v", err)
-	}
+	// if err := config.SeedDatabase(context.Background(), db, cfg); err != nil {
+	// 	log.Fatalf("❌ Database seeding failed: %v", err)
+	// }
 
 	// 🔧 Disable automatic redirect for trailing slash
 	r := gin.New()
