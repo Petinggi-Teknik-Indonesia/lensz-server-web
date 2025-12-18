@@ -49,7 +49,9 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: echo "CONNECTED OK"
+          script: 
+            echo "CONNECTED OK"
+            /root/lensz-backend/deploy.sh
           timeout: 60s
           command_timeout: 30s
 
