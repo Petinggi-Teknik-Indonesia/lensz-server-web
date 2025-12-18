@@ -33,25 +33,19 @@ jobs:
           IMAGE_NAME=ghcr.io/$USERNAME/lensz-backend:latest
           echo "Pushing $IMAGE_NAME"
           docker push $IMAGE_NAME
-
+  
   deploy:
     needs: build
     runs-on: ubuntu-latest
-
+  
     steps:
-      - name: Debug SSH key format
-        run: |
-          echo "${{ secrets.SERVER_SSH_KEY }}" | ssh-keygen -y || echo "INVALID SSH PRIVATE KEY!"
-      
-      - name: Test raw SSH connection (no command)
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: 
-            echo "CONNECTED OK"
+          script: |
+            echo "🚀 Starting deployment..."
+            chmod +x /root/lensz-backend/deploy.sh
             /root/lensz-backend/deploy.sh
-          timeout: 60s
-          command_timeout: 30s
-
