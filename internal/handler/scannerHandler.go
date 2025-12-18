@@ -5,15 +5,18 @@ import (
 	"net/http"
 	"time"
 
+	"lensz-server-web/internal/service"
 	"lensz-server-web/internal/ws"
-	"github.com/gin-gonic/gin"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ScannerHandler struct {
-	hub *ws.Hub
+	hub           *ws.Hub
 	isRegistering bool
-	mu sync.Mutex
+	mu            sync.Mutex
+	service       *service.ScannerService
 }
 
 const registerTimeout = 30 * time.Second // example duration
@@ -24,10 +27,17 @@ func NewScannerHandler(hub *ws.Hub) *ScannerHandler {
 
 func (h *ScannerHandler) Scan(c *gin.Context) {
 	var body struct {
-		RFID string `json:"rfid" binding:"required"`
+		RFID     string `json:"rfid" binding:"required"`
+		DeviceName string `json:"deviceName" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if _,err := h.service.GetByName(c, body.DeviceName); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})
 		return
 	}
 

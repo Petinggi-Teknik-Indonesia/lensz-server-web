@@ -21,7 +21,7 @@ func NewScannerCRUDHandler(service *service.ScannerService) *ScannerCRUDHandler 
 // POST /api/scanners
 func (h *ScannerCRUDHandler) Create(c *gin.Context) {
 	var req struct {
-		Name string `json:"name" binding:"required"`
+		DeviceName string `json:"deviceName" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -30,7 +30,7 @@ func (h *ScannerCRUDHandler) Create(c *gin.Context) {
 	}
 
 	scanner := model.Scanner{
-		Name: req.Name,
+		DeviceName: req.DeviceName,
 	}
 
 	if err := h.service.Create(c, &scanner); err != nil {
