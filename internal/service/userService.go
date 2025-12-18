@@ -172,3 +172,11 @@ func (s *UserService) GetVerifiedByOrg(ctx context.Context, orgID uint) ([]model
 func (s *UserService) GetAllVerified(ctx context.Context) ([]model.User, error) {
 	return s.repo.FindAllVerified(ctx)
 }
+
+func (s *UserService) GetMe(ctx context.Context, userID uint) (*model.User, error) {
+	user, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}

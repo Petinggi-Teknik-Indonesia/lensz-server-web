@@ -26,17 +26,17 @@ func NewScannerHandler(hub *ws.Hub) *ScannerHandler {
 }
 
 func (h *ScannerHandler) Scan(c *gin.Context) {
-	var body struct {
-		RFID     string `json:"rfid" binding:"required"`
+	var req struct {
+		RFID       string `json:"rfid" binding:"required"`
 		DeviceName string `json:"deviceName" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&body); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if _,err := h.service.GetByName(c, body.DeviceName); err != nil {
+	if _, err := h.service.GetByName(c, req.DeviceName); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})
 		return
 	}
@@ -53,7 +53,7 @@ func (h *ScannerHandler) Scan(c *gin.Context) {
 	msg := map[string]interface{}{
 		"type": "rfid_scanned",
 		"payload": map[string]string{
-			"rfid": body.RFID,
+			"rfid": req.RFID,
 		},
 	}
 	b, _ := json.Marshal(msg)
@@ -91,4 +91,32 @@ func (h *ScannerHandler) CancelRegistration(c *gin.Context) {
 	h.isRegistering = false
 	h.mu.Unlock()
 	c.JSON(http.StatusAccepted, gin.H{"message": "Registration canceled"})
+}
+
+func (h *ScannerHandler) Search(c *gin.Context) {
+	var req struct {
+		RFID       string `json:"rfid" binding:"required"`
+		DeviceName string `json:"deviceName" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if _, err := h.service.GetByName(c, req.DeviceName); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})
+		return
+	}
+	msg := map[string]interface{}{
+		"type": "rfid_search",
+		"payload": map[string]string{
+			"rfid": req.RFID,
+		},
+	}
+
+	b, _ := json.Marshal(msg)
+	h.hub.Broadcast <- b
+
+	c.JSON(http.StatusOK, gin.H{"message": "Search request sent"})
 }

@@ -181,3 +181,31 @@ func (h *UserHandler) GetVerifiedByOrg(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
+
+// GET /api/auth/me
+func (h *UserHandler) Me(c *gin.Context) {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
+		return
+	}
+
+	userID := uint(userIDVal.(float64)) // JWT numeric claims are float64
+
+	user, err := h.service.GetMe(c, userID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return safe user profile (no password)
+	c.JSON(http.StatusOK, gin.H{
+		"id":             user.ID,
+		"name":           user.Name,
+		"email":          user.Email,
+		"role":           user.Role,
+		"organization":   user.Organization,
+		"verifiedStatus": user.VerifiedStatus,
+		"createdAt":      user.CreatedAt,
+	})
+}

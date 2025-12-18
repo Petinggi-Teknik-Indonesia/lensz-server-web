@@ -56,6 +56,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	websocket := r.Group("/scanner")
 	{
 		websocket.POST("/scan", scannerHandler.Scan)
+		websocket.POST("/search", scannerHandler.Search)
 		websocket.POST("/complete", scannerHandler.CompleteRegistration)
 		websocket.POST("/cancel", scannerHandler.CancelRegistration)
 
@@ -89,8 +90,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		auth := api.Group("/auth")
+		auth.Use(middleware.Authenticate(jwtSecret))
 		{
-			auth.GET("/me")
+			auth.GET("/me", userHandler.Me)
 			auth.POST("/refresh", userHandler.Refresh)
 		}
 
