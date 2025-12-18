@@ -47,5 +47,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo "🚀 Starting deployment..."
-            chmod +x /root/lensz-backend/deploy.sh
-            /root/lensz-backend/deploy.sh
+            cd /root/lensz-backend
+            ./deploy.sh
