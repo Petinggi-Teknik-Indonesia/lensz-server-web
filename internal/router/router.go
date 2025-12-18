@@ -85,7 +85,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		}
 
 		glasses := api.Group("/glasses")
-		glasses.Use(middleware.Authenticate(jwtSecret), middleware.RequireRoles(3))
+		glasses.Use(middleware.Authenticate(jwtSecret))
 		{
 			glasses.POST("", glassesHandler.Create)
 			glasses.GET("", glassesHandler.GetAll)
@@ -128,11 +128,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		roles := api.Group("/roles")
 		roles.Use(middleware.Authenticate(jwtSecret))
 		{
-			roles.POST("", roleHandler.Create)
 			roles.GET("", roleHandler.GetAll)
+			roles.Use(middleware.RequireRoles(1,2))
+			roles.POST("", roleHandler.Create)
 			roles.GET("/:id", roleHandler.GetByID)
 			roles.PUT("/:id", roleHandler.Update)
-			roles.DELETE("/:id", roleHandler.Delete)
+			roles.DELETE("/:id",roleHandler.Delete)
 		}
 
 		orgs := api.Group("/organizations")
