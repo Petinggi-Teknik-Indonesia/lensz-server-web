@@ -36,6 +36,15 @@ func (r *RoleRepository) FindRoleByID(ctx context.Context, id uint) (*model.Role
 	return &role, nil
 }
 
+func (r *RoleRepository) FindRoleByName(ctx context.Context, name []string) ([]model.Role, error) {
+	var roles []model.Role
+	err := r.db.WithContext(ctx).
+		Where("name IN ?", name).
+		Find(&roles).Error
+	return roles, err
+}
+
+
 // Update role
 func (r *RoleRepository) UpdateRole(ctx context.Context, role *model.Role) error {
 	return r.db.WithContext(ctx).Save(role).Error

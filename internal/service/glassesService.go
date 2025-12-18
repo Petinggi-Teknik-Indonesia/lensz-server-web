@@ -18,7 +18,7 @@ func NewGlassesService(repo *repository.GlassesRepository, historyRepo *reposito
 	return &GlassesService{repo: repo, historyRepo: historyRepo}
 }
 
-func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) error {
+func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses, userID uint) error {
 	// ---- HANDLE BRAND ----
 	fmt.Println(g);
 	if g.Brand.ID != 0 {
@@ -73,12 +73,13 @@ func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses) er
 	if err := s.repo.CreateGlasses(ctx, g); err != nil {
 		return err
 	}
+	
 
 	// logging
 	history := &model.StatusHistory{
 		StatusChange: g.Status,
 		GlassesID:    g.ID,
-		UserID:       1, // dummy
+		UserID:       userID, 
 	}
 	return s.historyRepo.CreateHistory(ctx, history)
 }
@@ -102,7 +103,7 @@ func (s *GlassesService) GetGlassesSimplifiedByID(ctx context.Context, id uint) 
 
 
 
-func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) error {
+func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses, userID uint) error {
 	existing, err := s.repo.FindGlassesByID(ctx, g.ID)
 	if err != nil {
 		return errors.New("glasses not found")
@@ -117,7 +118,7 @@ func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) er
 		history := &model.StatusHistory{
 			StatusChange: g.Status,
 			GlassesID:    g.ID,
-			UserID:       1, // TODO: replace with actual user
+			UserID:       userID,
 		}
 		return s.historyRepo.CreateHistory(ctx, history)
 	}
@@ -125,7 +126,7 @@ func (s *GlassesService) UpdateGlasses(ctx context.Context, g *model.Glasses) er
 	return nil
 }
 
-func (s *GlassesService) UpdateGlassesStatusByRFID(ctx context.Context, rfid string, newStatus model.GlassesStatus) error {
+func (s *GlassesService) UpdateGlassesStatusByRFID(ctx context.Context, rfid string, newStatus model.GlassesStatus, userID uint) error {
 	// Find glasses by RFID
 	glasses, err := s.repo.FindGlassesByRFID(ctx, rfid)
 	if err != nil {
@@ -142,7 +143,7 @@ func (s *GlassesService) UpdateGlassesStatusByRFID(ctx context.Context, rfid str
 	history := &model.StatusHistory{
 		StatusChange: newStatus,
 		GlassesID:    glasses.ID,
-		UserID:       1, // TODO: from auth
+		UserID:       userID,
 	}
 	return s.historyRepo.CreateHistory(ctx, history)
 }

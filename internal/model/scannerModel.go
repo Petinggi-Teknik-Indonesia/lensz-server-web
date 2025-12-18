@@ -9,5 +9,5 @@ type Scanner struct {
 	gorm.Model
 	Name           string       `json:"name"`
 	OrganizationID uint         `json:"organizationId"` // foreign key
-	Organization   Organization `json:"organization" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Organization   Organization `json:"-" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

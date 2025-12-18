@@ -55,7 +55,7 @@ func (h *HistoryHandler) UpdateStatusByRFID(c *gin.Context) {
 		return
 	}
 
-	if err := h.glassesService.UpdateGlassesStatusByRFID(c, req.RFID, req.Status); err != nil {
+	if err := h.glassesService.UpdateGlassesStatusByRFID(c, req.RFID, req.Status, 0); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
