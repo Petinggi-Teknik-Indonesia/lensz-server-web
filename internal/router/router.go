@@ -45,6 +45,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	orgService := service.NewOrganizationService(orgRepo)
 	orgHandler := handler.NewOrganizationHandler(orgService)
 
+	scannerRepo := repository.NewScannerRepository(db)
+	scannerService := service.NewScannerService(scannerRepo)
+	scannerCRUDHandler := handler.NewScannerCRUDHandler(scannerService)
+
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
 
@@ -72,9 +76,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 
 			// admin-only routes
 			admin := users.Group("/admin")
-			admin.Use(middleware.Authenticate(jwtSecret), middleware.RequireRoles(1,2))
+			admin.Use(middleware.Authenticate(jwtSecret), middleware.RequireRoles(1, 2))
 			{
-				// admin.POST("/admin-register", userHandler.AdminRegister)
+				// admin.POST("/register", userHandler.AdminRegister)
 				admin.PATCH("/verify/:email", userHandler.VerifyUser)
 				admin.DELETE("/reject/:email", userHandler.CancelUser)
 				admin.GET("/unverified", userHandler.GetAllUnverified)
@@ -97,7 +101,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			glasses.GET("", glassesHandler.GetAll)
 			glasses.GET("/:id", glassesHandler.GetByID)
 			glasses.PUT("/:id", glassesHandler.Update)
-			glasses.DELETE("/:id",middleware.RequireRoles(1,2),glassesHandler.Delete)
+			glasses.DELETE("/:id", middleware.RequireRoles(1, 2), glassesHandler.Delete)
 
 			glasses.GET("/:id/history", historyHandler.GetByGlassesID)
 		}
@@ -109,7 +113,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			drawers.GET("", dependencyHandler.GetAllDrawers)
 			drawers.GET("/:id", dependencyHandler.GetDrawerByID)
 			drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
-			drawers.DELETE("/:id", middleware.RequireRoles(1,2), dependencyHandler.DeleteDrawer)
+			drawers.DELETE("/:id", middleware.RequireRoles(1, 2), dependencyHandler.DeleteDrawer)
 		}
 
 		brands := api.Group("/brands")
@@ -119,7 +123,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			brands.GET("", dependencyHandler.GetAllBrands)
 			brands.GET("/:id", dependencyHandler.GetBrandByID)
 			brands.PUT("/:id", dependencyHandler.UpdateBrand)
-			brands.DELETE("/:id", middleware.RequireRoles(1,2), dependencyHandler.DeleteBrand,)
+			brands.DELETE("/:id", middleware.RequireRoles(1, 2), dependencyHandler.DeleteBrand)
 		}
 
 		companies := api.Group("/companies")
@@ -129,17 +133,17 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			companies.GET("", dependencyHandler.GetAllCompanies)
 			companies.GET("/:id", dependencyHandler.GetCompanyByID)
 			companies.PUT("/:id", dependencyHandler.UpdateCompany)
-			companies.DELETE("/:id", middleware.RequireRoles(1,2), dependencyHandler.DeleteCompany)
+			companies.DELETE("/:id", middleware.RequireRoles(1, 2), dependencyHandler.DeleteCompany)
 		}
 		roles := api.Group("/roles")
 		roles.Use(middleware.Authenticate(jwtSecret))
 		{
 			roles.GET("", roleHandler.GetAll)
-			roles.Use(middleware.RequireRoles(1,2))
+			roles.Use(middleware.RequireRoles(1, 2))
 			roles.POST("", roleHandler.Create)
 			roles.GET("/:id", roleHandler.GetByID)
 			roles.PUT("/:id", roleHandler.Update)
-			roles.DELETE("/:id",roleHandler.Delete)
+			roles.DELETE("/:id", roleHandler.Delete)
 		}
 
 		orgs := api.Group("/organizations")
@@ -150,6 +154,14 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			orgs.GET("/:id", orgHandler.GetByID)
 			orgs.PUT("/:id", orgHandler.Update)
 			orgs.DELETE("/:id", orgHandler.Delete)
+		}
+		scanners := api.Group("/scanners")
+		scanners.Use(middleware.Authenticate(jwtSecret))
+		{
+			scanners.POST("", middleware.RequireRoles(1, 2), scannerCRUDHandler.Create)
+			scanners.GET("", scannerCRUDHandler.GetAll)
+			scanners.GET("/:id", scannerCRUDHandler.GetByID)
+			scanners.DELETE("/:id", middleware.RequireRoles(1, 2), scannerCRUDHandler.Delete)
 		}
 
 	}
