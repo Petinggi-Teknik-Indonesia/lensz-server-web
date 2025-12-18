@@ -84,6 +84,12 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			}
 		}
 
+		auth := api.Group("/auth")
+		{
+			auth.GET("/me")
+			auth.POST("/refresh", userHandler.Refresh)
+		}
+
 		glasses := api.Group("/glasses")
 		glasses.Use(middleware.Authenticate(jwtSecret))
 		{

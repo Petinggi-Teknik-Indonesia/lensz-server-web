@@ -5,6 +5,7 @@ import (
 	"lensz-server-web/internal/service"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,19 +57,56 @@ func (h *UserHandler) Login(c *gin.Context) {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	token, err := h.service.Login(c, req.Email, req.Password)
+	accessToken, refreshToken, err := h.service.Login(c, req.Email, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+	})
 }
+
+// POST /api/users/refresh
+func (h *UserHandler) Refresh(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Authorization header missing",
+		})
+		return
+	}
+
+	// Expected: "Bearer <refresh_token>"
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid authorization format",
+		})
+		return
+	}
+
+	newAccessToken, err := h.service.RefreshToken(c, tokenString)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accessToken": newAccessToken,
+	})
+}
+
 
 // PATCH /api/users/verify/:email
 func (h *UserHandler) VerifyUser(c *gin.Context) {

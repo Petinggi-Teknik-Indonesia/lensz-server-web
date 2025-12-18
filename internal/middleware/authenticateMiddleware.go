@@ -47,6 +47,12 @@ func Authenticate(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
+		if claims["type"] != "access" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token type"})
+			c.Abort()
+			return
+		}
+
 		// Inject token data into Gin context for later use
 		c.Set("user_id", claims["id"])
 		c.Set("role_id", claims["role"])
