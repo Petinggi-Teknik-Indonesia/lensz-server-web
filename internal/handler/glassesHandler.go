@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"net/http"
-	"strconv"
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/service"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +25,14 @@ func (h *GlassesHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.CreateGlasses(c, &req); err != nil {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
+		return
+	}
+	userID := uint(userIDVal.(float64)) // JWT numeric values are float64
+
+	if err := h.service.CreateGlasses(c, &req, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -64,7 +71,14 @@ func (h *GlassesHandler) Update(c *gin.Context) {
 	}
 	req.ID = uint(id)
 
-	if err := h.service.UpdateGlasses(c, &req); err != nil {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthenticated"})
+		return
+	}
+	userID := uint(userIDVal.(float64))
+
+	if err := h.service.UpdateGlasses(c, &req, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
