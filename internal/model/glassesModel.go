@@ -39,7 +39,7 @@ type Glasses struct {
 	Drawer  Drawer  `json:"drawer"`
 	Brand   Brand   `json:"brand"`
 	Company Company `json:"company"`
-    Organization   Organization `json:"organization" gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+    Organization   Organization `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
 	StatusHistory []StatusHistory `json:"statusHistory" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	
