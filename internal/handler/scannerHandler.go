@@ -25,7 +25,7 @@ func NewScannerHandler(hub *ws.Hub) *ScannerHandler {
 	return &ScannerHandler{hub: hub}
 }
 
-func (h *ScannerHandler) Scan(c *gin.Context) {
+func (h *ScannerHandler) Register(c *gin.Context) {
 	var req struct {
 		RFID       string `json:"rfid" binding:"required"`
 		DeviceName string `json:"deviceName" binding:"required"`
@@ -119,4 +119,8 @@ func (h *ScannerHandler) Search(c *gin.Context) {
 	h.hub.Broadcast <- b
 
 	c.JSON(http.StatusOK, gin.H{"message": "Search request sent"})
+}
+
+func (h *ScannerHandler) Scan(c *gin.Context){
+
 }

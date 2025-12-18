@@ -55,8 +55,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	// Scanner
 	websocket := r.Group("/scanner")
 	{
+		websocket.POST("/register", scannerHandler.Register)
 		websocket.POST("/scan", scannerHandler.Scan)
 		websocket.POST("/search", scannerHandler.Search)
+		websocket.POST("/drawer", scannerHandler.Search)
 		websocket.POST("/complete", scannerHandler.CompleteRegistration)
 		websocket.POST("/cancel", scannerHandler.CancelRegistration)
 
