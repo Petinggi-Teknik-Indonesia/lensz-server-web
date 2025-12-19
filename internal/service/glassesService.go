@@ -87,6 +87,9 @@ func (s *GlassesService) CreateGlasses(ctx context.Context, g *model.Glasses, us
 func (s *GlassesService) GetGlassesByID(ctx context.Context, id uint) (*model.Glasses, error) {
 	return s.repo.FindGlassesByID(ctx, id)
 }
+func (s *GlassesService) GetGlassesByRFID(ctx context.Context, id string) (*model.Glasses, error) {
+	return s.repo.FindGlassesByRFID(ctx, id)
+}
 
 func (s *GlassesService) GetAllGlasses(ctx context.Context) ([]model.Glasses, error) {
 	return s.repo.FindAllGlasses(ctx)

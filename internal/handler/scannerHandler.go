@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"lensz-server-web/internal/service"
@@ -20,26 +21,28 @@ type ScannerHandler struct {
 	mu                sync.Mutex
 	service           *service.ScannerService
 	drawerScanService *service.DrawerScanService
-	heartbeatStore *service.ScannerHeartbeatStore
+	glassesService    *service.GlassesService
+	heartbeatStore    *service.ScannerHeartbeatStore
 
 	registrationRFID string
 	lastHeartbeatAt  time.Time
 
 	searchCancel context.CancelFunc
-	searchRFID   string
+	searchRFID   uint
 }
-
 
 func NewScannerHandler(
 	hub *ws.Hub,
 	scannerService *service.ScannerService,
 	drawerScanService *service.DrawerScanService,
+	glassesService *service.GlassesService,
 	heartbeat *service.ScannerHeartbeatStore,
 ) *ScannerHandler {
 	return &ScannerHandler{
 		hub:               hub,
 		service:           scannerService,
 		drawerScanService: drawerScanService,
+		glassesService:    glassesService,
 		heartbeatStore:    heartbeat,
 	}
 }
@@ -50,7 +53,6 @@ func (h *ScannerHandler) Register(c *gin.Context) {
 		DeviceName string `json:"deviceName" binding:"required"`
 	}
 
-	
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -182,6 +184,12 @@ func (h *ScannerHandler) Search(c *gin.Context) {
 		return
 	}
 
+	glasses, err := h.glassesService.GetGlassesByRFID(c, req.RFID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Glasses not found"})
+		return
+	}
+
 	if h.searchCancel != nil {
 		h.searchCancel()
 		h.searchCancel = nil
@@ -189,9 +197,9 @@ func (h *ScannerHandler) Search(c *gin.Context) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	h.searchCancel = cancel
-	h.searchRFID = req.RFID
+	h.searchRFID = glasses.ID
 
-	go h.searchBroadcaster(ctx, req.RFID)
+	go h.searchBroadcaster(ctx, strconv.FormatUint(uint64(glasses.ID), 10))
 
 	c.JSON(http.StatusOK, gin.H{"message": "Search started"})
 
