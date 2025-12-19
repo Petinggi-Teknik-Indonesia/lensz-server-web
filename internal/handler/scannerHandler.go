@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -49,10 +50,12 @@ func (h *ScannerHandler) Register(c *gin.Context) {
 		DeviceName string `json:"deviceName" binding:"required"`
 	}
 
+	
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	log.Print(h.service.GetByName(c, req.DeviceName))
 
 	if _, err := h.service.GetByName(c, req.DeviceName); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})

@@ -30,7 +30,7 @@ func (r *ScannerRepository) FindByID(ctx context.Context, id uint, orgID uint) (
 	return &scanner, nil
 }
 
-func (r *ScannerRepository) FindByName(ctx context.Context, name string, orgID uint) (*model.Scanner, error) {
+func (r *ScannerRepository) FindByName(ctx context.Context, name string) (*model.Scanner, error) {
 	var scanner model.Scanner
 	err := r.db.WithContext(ctx).
 		Where("device_name = ?", name).

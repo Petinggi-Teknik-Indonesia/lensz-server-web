@@ -60,12 +60,7 @@ func (s *ScannerService) GetByID(c *gin.Context, id uint) (*model.Scanner, error
 	return s.repo.FindByID(c, id, orgID)
 }
 func (s *ScannerService) GetByName(c *gin.Context, name string) (*model.Scanner, error) {
-	orgID, err := getOrgIDFromContext(c)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.repo.FindByName(c, name, orgID)
+	return s.repo.FindByName(c, name)
 }
 
 func (s *ScannerService) Delete(c *gin.Context, id uint) error {

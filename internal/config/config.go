@@ -52,8 +52,7 @@ func InitDB(cfg Config) (*gorm.DB, error) {
 		" user=" + cfg.DBUser +
 		" password=" + cfg.DBPassword +
 		" dbname=" + cfg.DBName +
-		" port=" + cfg.DBPort +
-		" sslmode=require"
+		" port=" + cfg.DBPort
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
