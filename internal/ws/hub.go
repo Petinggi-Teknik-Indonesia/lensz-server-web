@@ -8,6 +8,9 @@ type Hub struct {
 	Register   chan *Client
 	Unregister chan *Client
 	mu         sync.Mutex
+
+	Incoming  chan []byte
+	onMessage func([]byte)
 }
 
 func NewHub() *Hub {
@@ -16,7 +19,12 @@ func NewHub() *Hub {
 		Broadcast:  make(chan []byte),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
+		Incoming:   make(chan []byte),
 	}
+}
+
+func (h *Hub) SetOnMessageHandler(fn func([]byte)) {
+	h.onMessage = fn
 }
 
 func (h *Hub) Run() {
@@ -42,6 +50,11 @@ func (h *Hub) Run() {
 				}
 			}
 			h.mu.Unlock()
+		case msg := <-h.Incoming:
+			if h.onMessage != nil {
+				h.onMessage(msg)
+			}
 		}
+
 	}
 }

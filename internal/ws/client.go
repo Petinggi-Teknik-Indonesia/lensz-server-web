@@ -1,8 +1,9 @@
 package ws
 
 import (
-	"time"
 	"log"
+	"time"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -19,10 +20,12 @@ func (c *Client) ReadPump() {
 		c.Conn.Close()
 	}()
 	for {
-		if _, _, err := c.Conn.ReadMessage(); err != nil {
+		_, msg, err := c.Conn.ReadMessage()
+		if err != nil {
 			log.Println("⚠️ ReadPump error:", err)
 			break
 		}
+		c.Hub.Incoming <- msg
 	}
 }
 

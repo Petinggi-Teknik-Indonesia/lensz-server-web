@@ -29,8 +29,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	historyHandler := handler.NewHistoryHandler(historyService, glassesService, hub)
 	glassesHandler := handler.NewGlassesHandler(glassesService)
 
-	scannerHandler := handler.NewScannerHandler(hub)
-
 	dependencyService := service.NewGlassesDependencyService(glassesRepo)
 	dependencyHandler := handler.NewGlassesDependencyHandler(dependencyService)
 
@@ -48,6 +46,11 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	scannerRepo := repository.NewScannerRepository(db)
 	scannerService := service.NewScannerService(scannerRepo)
 	scannerCRUDHandler := handler.NewScannerCRUDHandler(scannerService)
+	drawerScanService := service.NewDrawerScanService(glassesRepo)
+	scannerHandler := handler.NewScannerHandler(hub, scannerService, drawerScanService)
+	drawerScanHandler := handler.NewDrawerScanHandler(drawerScanService, hub)
+
+	hub.SetOnMessageHandler(scannerHandler.HandleWSMessage)
 
 	// WebSocket
 	r.GET("/ws", ws.ServeWs(hub))
@@ -58,9 +61,6 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		websocket.POST("/register", scannerHandler.Register)
 		websocket.POST("/scan", scannerHandler.Scan)
 		websocket.POST("/search", scannerHandler.Search)
-		websocket.POST("/drawer", scannerHandler.Search)
-		websocket.POST("/complete", scannerHandler.CompleteRegistration)
-		websocket.POST("/cancel", scannerHandler.CancelRegistration)
 
 		websocket.PATCH("/status", historyHandler.UpdateStatusByRFID)
 	}
@@ -117,6 +117,8 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 			drawers.GET("", dependencyHandler.GetAllDrawers)
 			drawers.GET("/:id", dependencyHandler.GetDrawerByID)
 			drawers.PUT("/:id", dependencyHandler.UpdateDrawer)
+			drawers.POST("/:id/check", drawerScanHandler.Start)
+			drawers.POST("/check/:sessionId/stop", drawerScanHandler.Stop)
 			drawers.DELETE("/:id", middleware.RequireRoles(1, 2), dependencyHandler.DeleteDrawer)
 		}
 
