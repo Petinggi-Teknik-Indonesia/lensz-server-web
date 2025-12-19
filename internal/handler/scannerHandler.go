@@ -24,6 +24,7 @@ type ScannerHandler struct {
 	glassesService    *service.GlassesService
 	heartbeatStore    *service.ScannerHeartbeatStore
 
+	hasHeartbeat     bool
 	registrationRFID string
 	lastHeartbeatAt  time.Time
 
@@ -96,40 +97,49 @@ func (h *ScannerHandler) broadcastRegistration(event string) {
 	b, _ := json.Marshal(msg)
 	h.hub.Broadcast <- b
 }
-
 func (h *ScannerHandler) registrationWatchdog() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
 		h.mu.Lock()
+
 		if !h.isRegistering {
 			h.mu.Unlock()
 			return
 		}
 
 		if time.Since(h.lastHeartbeatAt) > 30*time.Second {
-			h.cancelRegistration("registration_timeout")
 			h.mu.Unlock()
+			h.cancelRegistration("registration_timeout")
 			return
 		}
-		h.mu.Unlock()
 
-		h.broadcastRegistration("registration_waiting")
+		// ✅ only broadcast waiting BEFORE first heartbeat
+		if !h.hasHeartbeat {
+			h.mu.Unlock()
+			h.broadcastRegistration("registration_waiting")
+			continue
+		}
+
+		h.mu.Unlock()
+		// 🔕 silent while heartbeats are alive
 	}
 }
 
 func (h *ScannerHandler) cancelRegistration(event string) {
-	h.isRegistering = false
-	h.registrationRFID = ""
+    h.mu.Lock()
+    h.isRegistering = false
+    h.hasHeartbeat = false
+    h.registrationRFID = ""
+    h.mu.Unlock()
 
-	msg := map[string]interface{}{
-		"type": event,
-	}
-
-	b, _ := json.Marshal(msg)
-	h.hub.Broadcast <- b
+    b, _ := json.Marshal(map[string]interface{}{
+        "type": event,
+    })
+    h.hub.Broadcast <- b
 }
+
 
 func (h *ScannerHandler) HandleWSMessage(msg []byte) {
 	var data struct {
@@ -140,32 +150,28 @@ func (h *ScannerHandler) HandleWSMessage(msg []byte) {
 		return
 	}
 
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	if !h.isRegistering {
-		return
-	}
-
 	switch data.Type {
 
 	case "registration_heartbeat":
-		h.lastHeartbeatAt = time.Now()
+		h.mu.Lock()
+		if h.isRegistering {
+			h.lastHeartbeatAt = time.Now()
+			h.hasHeartbeat = true
+		}
+		h.mu.Unlock()
 
 	case "registration_confirm":
-		h.cancelRegistration("registration_confirmed")
+		go h.cancelRegistration("registration_confirmed")
 
 	case "registration_cancel":
-		h.cancelRegistration("registration_cancelled")
+		go h.cancelRegistration("registration_cancelled")
 
 	case "search_ack":
 		if h.searchCancel != nil {
 			h.searchCancel()
 			h.searchCancel = nil
 		}
-
 	}
-
 }
 
 func (h *ScannerHandler) Search(c *gin.Context) {

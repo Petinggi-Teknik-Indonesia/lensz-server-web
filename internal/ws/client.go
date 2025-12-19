@@ -15,19 +15,20 @@ type Client struct {
 
 func (c *Client) ReadPump() {
 	defer func() {
-		log.Println("📴 Client disconnected (ReadPump)")
 		c.Hub.Unregister <- c
 		c.Conn.Close()
 	}()
 	for {
 		_, msg, err := c.Conn.ReadMessage()
 		if err != nil {
-			log.Println("⚠️ ReadPump error:", err)
 			break
 		}
+		log.Println("📥 WS raw message:", string(msg))
 		c.Hub.Incoming <- msg
 	}
 }
+
+
 
 func (c *Client) WritePump() {
 	defer func() {

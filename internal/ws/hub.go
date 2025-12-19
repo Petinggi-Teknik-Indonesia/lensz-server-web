@@ -19,7 +19,7 @@ func NewHub() *Hub {
 		Broadcast:  make(chan []byte),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
-		Incoming:   make(chan []byte),
+		Incoming:   make(chan []byte,32),
 	}
 }
 

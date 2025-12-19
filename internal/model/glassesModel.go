@@ -63,8 +63,8 @@ type StatusHistory struct {
 	StatusChange GlassesStatus `json:"statusChange" gorm:"type:varchar(20);not null"`
 	GlassesID    uint          `json:"glassesId"`
 	UserID       uint          `json:"userId"`
-	OrganizationID uint		   `json:"organizationId"`
-	Organization Organization
+	// OrganizationID uint		   `json:"organizationId"`
+	// Organization Organization
 	Glasses      Glasses       `json:"glasses"`
 	User         User          `json:"user"`
 }
