@@ -50,7 +50,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 	drawerScanService := service.NewDrawerScanService(glassesRepo)
 	heartbeat := service.NewScannerHeartbeatStore(45 * time.Second)
 	scannerCRUDHandler := handler.NewScannerCRUDHandler(scannerService,heartbeat)
-	scannerHandler := handler.NewScannerHandler(hub, scannerService, drawerScanService,heartbeat)
+	scannerHandler := handler.NewScannerHandler(hub, scannerService, drawerScanService, glassesService,heartbeat)
 	drawerScanHandler := handler.NewDrawerScanHandler(drawerScanService, hub)
 
 	hub.SetOnMessageHandler(scannerHandler.HandleWSMessage)
