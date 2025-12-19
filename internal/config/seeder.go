@@ -156,7 +156,6 @@ func SeedDatabase(ctx context.Context, db *gorm.DB, cfg Config) error {
 			DrawerID:    drawerMap["A"].ID,
 			BrandID:     brandMap["RayBan"].ID,
 			CompanyID:   companyMap["PT Kacamata Nusa"].ID,
-			OrganizationID: 1,
 		},
 		{
 			Name:        "Cartier Premium",
@@ -168,7 +167,6 @@ func SeedDatabase(ctx context.Context, db *gorm.DB, cfg Config) error {
 			DrawerID:    drawerMap["B"].ID,
 			BrandID:     brandMap["Cartier"].ID,
 			CompanyID:   companyMap["PT Vision Abadi"].ID,
-			OrganizationID: 1,
 		},
 		{
 			Name:        "Nike Vision Sport",
@@ -180,7 +178,6 @@ func SeedDatabase(ctx context.Context, db *gorm.DB, cfg Config) error {
 			DrawerID:    drawerMap["C"].ID,
 			BrandID:     brandMap["Nike"].ID,
 			CompanyID:   companyMap["PT Lensa Optik"].ID,
-			OrganizationID: 1,
 		},
 	}
 
