@@ -19,6 +19,7 @@ type ScannerHandler struct {
 	mu                sync.Mutex
 	service           *service.ScannerService
 	drawerScanService *service.DrawerScanService
+	heartbeatStore *service.ScannerHeartbeatStore
 
 	registrationRFID string
 	lastHeartbeatAt  time.Time
@@ -27,17 +28,18 @@ type ScannerHandler struct {
 	searchRFID   string
 }
 
-const registerTimeout = 30 * time.Second // example duration
 
 func NewScannerHandler(
 	hub *ws.Hub,
 	scannerService *service.ScannerService,
 	drawerScanService *service.DrawerScanService,
+	heartbeat *service.ScannerHeartbeatStore,
 ) *ScannerHandler {
 	return &ScannerHandler{
 		hub:               hub,
 		service:           scannerService,
 		drawerScanService: drawerScanService,
+		heartbeatStore:    heartbeat,
 	}
 }
 
@@ -262,4 +264,28 @@ func (h *ScannerHandler) Scan(c *gin.Context) {
 
 	// 4️⃣ Respond to hardware with meaningful message
 	c.JSON(http.StatusOK, hwResp)
+}
+
+func (h *ScannerHandler) ScannerHeartbeat(c *gin.Context) {
+	var req struct {
+		DeviceName string `json:"deviceName" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// validate device exists
+	if _, err := h.service.GetByName(c, req.DeviceName); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})
+		return
+	}
+
+	// 🔴 record heartbeat
+	h.heartbeatStore.Beat(req.DeviceName)
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+	})
 }

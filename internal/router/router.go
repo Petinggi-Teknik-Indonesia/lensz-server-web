@@ -1,8 +1,6 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"lensz-server-web/internal/handler"
 	"lensz-server-web/internal/middleware"
 	"lensz-server-web/internal/repository"
@@ -10,6 +8,10 @@ import (
 	"lensz-server-web/internal/ws"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
@@ -45,9 +47,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 
 	scannerRepo := repository.NewScannerRepository(db)
 	scannerService := service.NewScannerService(scannerRepo)
-	scannerCRUDHandler := handler.NewScannerCRUDHandler(scannerService)
 	drawerScanService := service.NewDrawerScanService(glassesRepo)
-	scannerHandler := handler.NewScannerHandler(hub, scannerService, drawerScanService)
+	heartbeat := service.NewScannerHeartbeatStore(45 * time.Second)
+	scannerCRUDHandler := handler.NewScannerCRUDHandler(scannerService,heartbeat)
+	scannerHandler := handler.NewScannerHandler(hub, scannerService, drawerScanService,heartbeat)
 	drawerScanHandler := handler.NewDrawerScanHandler(drawerScanService, hub)
 
 	hub.SetOnMessageHandler(scannerHandler.HandleWSMessage)
@@ -61,6 +64,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB, hub *ws.Hub, jwtSecret string) {
 		websocket.POST("/register", scannerHandler.Register)
 		websocket.POST("/scan", scannerHandler.Scan)
 		websocket.POST("/search", scannerHandler.Search)
+		websocket.POST("/heartbeat", scannerHandler.ScannerHeartbeat)
 
 		websocket.PATCH("/status", historyHandler.UpdateStatusByRFID)
 	}

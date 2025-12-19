@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"lensz-server-web/internal/model"
 	"lensz-server-web/internal/service"
@@ -11,11 +12,12 @@ import (
 )
 
 type ScannerCRUDHandler struct {
-	service *service.ScannerService
+	service        *service.ScannerService
+	heartbeatStore *service.ScannerHeartbeatStore
 }
 
-func NewScannerCRUDHandler(service *service.ScannerService) *ScannerCRUDHandler {
-	return &ScannerCRUDHandler{service: service}
+func NewScannerCRUDHandler(service *service.ScannerService, heartbeatStore *service.ScannerHeartbeatStore) *ScannerCRUDHandler {
+	return &ScannerCRUDHandler{service: service, heartbeatStore: heartbeatStore}
 }
 
 // POST /api/scanners
@@ -49,8 +51,27 @@ func (h *ScannerCRUDHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, scanners)
+	type ScannerResponse struct {
+		model.Scanner
+		Online   bool       `json:"online"`
+		LastSeen *time.Time `json:"lastSeen,omitempty"`
+	}
+
+	var result []ScannerResponse
+
+	for _, s := range scanners {
+		online, lastSeen := h.heartbeatStore.IsOnline(s.DeviceName)
+
+		result = append(result, ScannerResponse{
+			Scanner: s,
+			Online: online,
+			LastSeen: lastSeen,
+		})
+	}
+
+	c.JSON(http.StatusOK, result)
 }
+
 
 // GET /api/scanners/:id
 func (h *ScannerCRUDHandler) GetByID(c *gin.Context) {
