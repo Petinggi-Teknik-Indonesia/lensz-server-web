@@ -36,6 +36,19 @@ func (r *GlassesRepository) FindGlassesByID(ctx context.Context, id uint) (*mode
 	}
 	return &glasses, nil
 }
+func (r *GlassesRepository) FindGlassesByDrawerID(ctx context.Context, id uint) ([]model.Glasses, error) {
+	var glasses []model.Glasses
+	err := r.db.WithContext(ctx).
+		Preload("Drawer").
+		Preload("Brand").
+		Preload("Company").
+		Where("drawer_id = ? AND deleted_at IS NULL", id).
+		Find(&glasses).Error
+	if err != nil {
+		return nil, err
+	}
+	return glasses, nil
+}
 
 // Get All Glasses
 func (r *GlassesRepository) FindAllGlasses(ctx context.Context) ([]model.Glasses, error) {

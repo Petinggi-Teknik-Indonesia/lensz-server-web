@@ -34,12 +34,15 @@ type Glasses struct {
 	DrawerID  uint `json:"drawerId"`
 	BrandID   uint `json:"brandId"`
 	CompanyID uint `json:"companyId"`
+	OrganizationID uint         `json:"organizationId"`
 
 	Drawer  Drawer  `json:"drawer"`
 	Brand   Brand   `json:"brand"`
 	Company Company `json:"company"`
+    Organization   Organization `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 
 	StatusHistory []StatusHistory `json:"statusHistory" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	
 }
 
 // Enum
@@ -62,6 +65,8 @@ type StatusHistory struct {
 	StatusChange GlassesStatus `json:"statusChange" gorm:"type:varchar(20);not null"`
 	GlassesID    uint          `json:"glassesId"`
 	UserID       uint          `json:"userId"`
+	OrganizationID uint		   `json:"organizationId"`
+	Organization Organization
 	Glasses      Glasses       `json:"glasses"`
 	User         User          `json:"user"`
 }

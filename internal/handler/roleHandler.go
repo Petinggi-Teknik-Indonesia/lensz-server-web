@@ -48,6 +48,19 @@ func (h *RoleHandler) GetByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, role)
 }
+// func (h *RoleHandler) GetByName(c *gin.Context) {
+// 	var req model.Role
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	role, err := h.service.GetRoleByName(c, req.Name)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, role)
+// }
 
 func (h *RoleHandler) Update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))

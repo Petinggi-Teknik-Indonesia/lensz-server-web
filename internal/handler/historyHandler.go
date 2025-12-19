@@ -13,9 +13,10 @@ import (
 )
 
 type HistoryHandler struct {
-	service         *service.HistoryService
-	glassesService  *service.GlassesService
-	hub             *ws.Hub
+	service        *service.HistoryService
+	glassesService *service.GlassesService
+	scannerService *service.ScannerService
+	hub            *ws.Hub
 }
 
 func NewHistoryHandler(historyService *service.HistoryService, glassesService *service.GlassesService, hub *ws.Hub) *HistoryHandler {
@@ -46,8 +47,9 @@ func (h *HistoryHandler) GetByGlassesID(c *gin.Context) {
 // PATCH /api/glasses/status
 func (h *HistoryHandler) UpdateStatusByRFID(c *gin.Context) {
 	var req struct {
-		RFID   string              `json:"rfid" binding:"required"`
-		Status model.GlassesStatus `json:"status" binding:"required"`
+		RFID       string              `json:"rfid" binding:"required"`
+		Status     model.GlassesStatus `json:"status" binding:"required"`
+		DeviceName string              `json:"deviceName" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -55,7 +57,12 @@ func (h *HistoryHandler) UpdateStatusByRFID(c *gin.Context) {
 		return
 	}
 
-	if err := h.glassesService.UpdateGlassesStatusByRFID(c, req.RFID, req.Status); err != nil {
+	if _, err := h.scannerService.GetByName(c, req.DeviceName); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid device"})
+		return
+	}
+
+	if err := h.glassesService.UpdateGlassesStatusByRFID(c, req.RFID, req.Status, 0); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

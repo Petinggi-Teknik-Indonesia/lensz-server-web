@@ -34,3 +34,9 @@ type StatusHistoryResponse struct {
 	UserName     string `json:"userName"`
 	CreatedAt    string `json:"createdAt"`
 }
+type HardwareScanResponse struct {
+	Message  string `json:"message"`
+	Counted  int    `json:"counted,omitempty"`
+	Expected int    `json:"expected,omitempty"`
+	Status   string `json:"status"` // ok | ignored | inactive | error
+}
